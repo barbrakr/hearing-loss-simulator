@@ -120,22 +120,71 @@ export function drawSpectrogram(audioBuffer, canvas, name = "UNKNOWN") {
                     )
                 );
 
-            const gray =
-                Math.round(
-                    value * 255
-                );
-
             const pixel =
-                (
-                    (rows - 1 - y)
-                    * columns
-                    + x
-                ) * 4;
-
-            image.data[pixel] = gray;
-            image.data[pixel + 1] = gray;
-            image.data[pixel + 2] = gray;
-            image.data[pixel + 3] = 255;
+            (
+                (rows - 1 - y)
+                * columns
+                + x
+            ) * 4;
+        // -------- colour map matching the colour bar --------
+        
+        const t = value;   // 0 = -100 dB, 1 = 0 dB
+        
+        let r, g, b;
+        
+        if(t < 0.25){
+        
+            // black -> blue
+        
+            const p = t / 0.25;
+        
+            r = 0;
+            g = 0;
+            b = Math.round(255 * p);
+        
+        }
+        
+        else if(t < 0.50){
+        
+            // blue -> cyan
+        
+            const p = (t - 0.25) / 0.25;
+        
+            r = 0;
+            g = Math.round(255 * p);
+            b = 255;
+        
+        }
+        
+        else if(t < 0.75){
+        
+            // cyan -> yellow
+        
+            const p = (t - 0.50) / 0.25;
+        
+            r = Math.round(255 * p);
+            g = 255;
+            b = Math.round(255 * (1 - p));
+        
+        }
+        
+        else {
+        
+            // yellow -> red
+        
+            const p = (t - 0.75) / 0.25;
+        
+            r = 255;
+            g = Math.round(255 * (1 - p));
+            b = 0;
+        
+        }
+        
+        
+        image.data[pixel]     = r;
+        image.data[pixel + 1] = g;
+        image.data[pixel + 2] = b;
+        image.data[pixel + 3] = 255;
 
         }
 
