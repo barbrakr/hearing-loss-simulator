@@ -34,6 +34,43 @@ const engine =
 
 let originalBuffer = null;
 
+const noiseButton =
+    document.getElementById(
+        "noiseButton"
+    );
+
+
+noiseButton.onclick = ()=>{
+
+
+    const type =
+        document.getElementById(
+            "noiseSelect"
+        ).value;
+
+
+    const noise =
+        createNoiseBuffer(
+            engine.context,
+            type,
+            engine.buffer.duration,
+            engine.buffer.sampleRate
+        );
+
+
+    engine.buffer =
+        mixBuffers(
+            engine.buffer,
+            noise,
+            0.15
+        );
+
+
+    status.innerHTML =
+        "Background noise added";
+
+};
+
 window.addEventListener(
 "DOMContentLoaded",
 ()=>{
