@@ -50,12 +50,16 @@ loadButton.onclick = async () => {
 
     try {
 
-        let buffer;
+        status.innerHTML = "Loading audio...";
+
 
         const source =
             document.querySelector(
                 'input[name="source"]:checked'
             ).value;
+
+
+        let buffer;
 
 
         if(source === "sample"){
@@ -66,13 +70,20 @@ loadButton.onclick = async () => {
                 ).value;
 
 
+            console.log(
+                "Loading sample:",
+                filename
+            );
+
+
             buffer =
                 await engine.loadFromURL(
                     filename
                 );
 
-        }
-        else {
+
+        } else {
+
 
             const file =
                 document.getElementById(
@@ -82,9 +93,8 @@ loadButton.onclick = async () => {
 
             if(!file){
 
-                alert(
-                    "Choose a WAV file."
-                );
+                status.innerHTML =
+                "Choose a WAV file.";
 
                 return;
 
@@ -99,26 +109,33 @@ loadButton.onclick = async () => {
         }
 
 
+        console.log(
+            "Loaded buffer:",
+            buffer
+        );
+
+
         status.innerHTML =
         `
-        Loaded successfully.<br>
+        Audio loaded.<br>
         Channels: ${buffer.numberOfChannels}<br>
-        Sample Rate: ${buffer.sampleRate} Hz<br>
-        Samples: ${buffer.length}
+        Sample rate: ${buffer.sampleRate}<br>
+        Length: ${buffer.length}
         `;
 
 
         playButton.disabled=false;
         stopButton.disabled=false;
+        processButton.disabled=false;
 
 
     }
-    catch(e){
+    catch(error){
 
-        console.error(e);
+        console.error(error);
 
         status.innerHTML =
-        e.message;
+        "Load error: " + error.message;
 
     }
 
