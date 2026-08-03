@@ -63,3 +63,33 @@ playButton.onclick = () => {
 stopButton.onclick = () => {
     engine.stop();
 };
+
+async loadFromURL(url){
+
+    console.log("Loading:", url);
+
+    await this.init();
+
+    const response = await fetch(url);
+
+    console.log(response);
+
+    if(!response.ok){
+
+        throw new Error(
+            "Couldn't load " + url
+        );
+
+    }
+
+    const arrayBuffer =
+        await response.arrayBuffer();
+
+    this.buffer =
+        await this.context.decodeAudioData(
+            arrayBuffer
+        );
+
+    return this.buffer;
+
+}
