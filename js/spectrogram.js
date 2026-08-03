@@ -114,12 +114,22 @@ export function drawSpectrogram(
                 );
 
 
+            const minDb = -100;
+            const maxDb = 0;
+            
+            
             const value =
                 Math.max(
                     0,
                     Math.min(
                         255,
-                        (db+100)*2.55
+                        (
+                            (db-minDb)
+                            /
+                            (maxDb-minDb)
+                        )
+                        *
+                        255
                     )
                 );
 
