@@ -77,6 +77,11 @@ function processChannel(
         new Float32Array(
             input.length
         );
+    
+    const windowSum =
+        new Float32Array(
+            input.length
+        );
 
 
     const window =
