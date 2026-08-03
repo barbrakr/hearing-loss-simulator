@@ -164,10 +164,10 @@ processButton.onclick = async ()=>{
 
 
         const result =
-            await applyHearingLoss(
-                engine.buffer
+            applyHearingLoss(
+                engine.buffer,
+                engine.context
             );
-
 
         engine.buffer =
             result;
