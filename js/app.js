@@ -93,58 +93,7 @@ ${buffer.length}
 
 };
 
-if(!file){
 
-alert(
-"Choose a WAV file."
-);
-
-return;
-
-}
-
-
-const buffer =
-await engine.load(file);
-
-
-status.innerHTML =
-
-`
-Loaded successfully.<br>
-
-Channels:
-${buffer.numberOfChannels}
-
-<br>
-
-Sample rate:
-${buffer.sampleRate}
-
-Hz
-
-<br>
-
-Samples:
-${buffer.length}
-
-`;
-
-
-console.log(
-engine.getLeft()
-);
-
-console.log(
-engine.getRight()
-);
-
-
-playButton.disabled=false;
-
-stopButton.disabled=false;
-
-};
 
 
 playButton.onclick=()=>{
