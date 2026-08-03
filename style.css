@@ -1,0 +1,43 @@
+body {
+
+font-family: Arial, sans-serif;
+
+padding:20px;
+
+}
+
+
+button {
+
+font-size:18px;
+
+padding:12px;
+
+}
+
+
+canvas {
+
+width:100%;
+
+height:300px;
+
+border:1px solid black;
+
+}
+
+
+table {
+
+border-collapse:collapse;
+
+}
+
+
+td, th {
+
+border:1px solid #999;
+
+padding:8px;
+
+}
