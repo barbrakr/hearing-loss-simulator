@@ -5,71 +5,292 @@ import {
 } from "./audiogram.js";
 
 
-export async function applyHearingLoss(audioBuffer){
-
-    const context =
-        new OfflineAudioContext(
-            audioBuffer.numberOfChannels,
-            audioBuffer.length,
-            audioBuffer.sampleRate
-        );
+export function applyHearingLoss(audioBuffer){
 
 
-    const source =
-        context.createBufferSource();
-
-    source.buffer = audioBuffer;
+    const sampleRate =
+        audioBuffer.sampleRate;
 
 
-    let node = source;
+    const length =
+        audioBuffer.length;
 
 
-    const loss =
-        getLeftLoss();
+    const channels =
+        audioBuffer.numberOfChannels;
 
 
-    for(let i=0;i<frequencies.length;i++){
+    const output =
+        new AudioBuffer({
 
-        const filter =
-            context.createBiquadFilter();
+            length:length,
 
-        filter.type = "peaking";
+            numberOfChannels:2,
 
-        filter.frequency.value =
-            frequencies[i];
+            sampleRate:sampleRate
 
-        filter.Q.value =
-            1;
-
-        filter.gain.value =
-        -loss[i];
+        });
 
 
-        node.connect(filter);
 
-        node = filter;
-    }
+    const left =
+        audioBuffer.getChannelData(0);
 
-        const makeup =
-        context.createGain();
-        
-        makeup.gain.value = 2;
-        
-        node.connect(makeup);
-        
-        makeup.connect(
-            context.destination
-        );
 
-    
-    node.connect(
-        context.destination
+    const right =
+        channels > 1
+        ? audioBuffer.getChannelData(1)
+        : left;
+
+
+
+    output.copyToChannel(
+        processChannel(
+            left,
+            sampleRate,
+            getLeftLoss()
+        ),
+        0
     );
 
 
-    source.start();
+
+    output.copyToChannel(
+        processChannel(
+            right,
+            sampleRate,
+            getRightLoss()
+        ),
+        1
+    );
 
 
-    return await context.startRendering();
+    return output;
+
+}
+
+
+
+
+function processChannel(
+    input,
+    sampleRate,
+    loss
+){
+
+
+    const n =
+        input.length;
+
+
+    const output =
+        new Float32Array(n);
+
+
+
+    const fftSize = 2048;
+
+    const hop = 1024;
+
+
+
+    const fft =
+        new FFT(fftSize);
+
+
+
+    const frame =
+        new Array(fftSize);
+
+
+
+    const spectrum =
+        fft.createComplexArray();
+
+
+
+    const inverse =
+        fft.createComplexArray();
+
+
+
+    let window =
+        new Float32Array(
+            fftSize
+        );
+
+
+    for(let i=0;i<fftSize;i++){
+
+        window[i] =
+        0.5 -
+        0.5 *
+        Math.cos(
+            2*Math.PI*i/(fftSize-1)
+        );
+
+    }
+
+
+
+    for(
+        let pos=0;
+        pos<n;
+        pos+=hop
+    ){
+
+
+        for(
+            let i=0;
+            i<fftSize;
+            i++
+        ){
+
+            frame[i] =
+            (input[pos+i] || 0)
+            *
+            window[i];
+
+        }
+
+
+
+        fft.realTransform(
+            spectrum,
+            frame
+        );
+
+
+        fft.completeSpectrum(
+            spectrum
+        );
+
+
+
+        for(
+            let bin=0;
+            bin<fftSize;
+            bin++
+        ){
+
+
+            const freq =
+            bin *
+            sampleRate /
+            fftSize;
+
+
+
+            const db =
+            interpolateLoss(
+                freq,
+                loss
+            );
+
+
+            const gain =
+            Math.pow(
+                10,
+                -db/20
+            );
+
+
+
+            spectrum[2*bin] *= gain;
+
+            spectrum[2*bin+1] *= gain;
+
+
+        }
+
+
+
+        fft.inverseTransform(
+            inverse,
+            spectrum
+        );
+
+
+
+        for(
+            let i=0;
+            i<fftSize;
+            i++
+        ){
+
+            if(pos+i<n){
+
+                output[pos+i] +=
+                inverse[2*i]
+                *
+                window[i]
+                /
+                fftSize;
+
+            }
+
+        }
+
+    }
+
+
+    return output;
+
+}
+
+
+
+
+function interpolateLoss(
+    freq,
+    loss
+){
+
+
+    if(freq <= frequencies[0])
+        return loss[0];
+
+
+    for(
+        let i=0;
+        i<frequencies.length-1;
+        i++
+    ){
+
+
+        if(
+            freq >= frequencies[i] &&
+            freq <= frequencies[i+1]
+        ){
+
+            const t =
+            (
+                freq -
+                frequencies[i]
+            )
+            /
+            (
+                frequencies[i+1] -
+                frequencies[i]
+            );
+
+
+            return (
+                loss[i]
+                +
+                t *
+                (
+                loss[i+1]
+                -
+                loss[i]
+                )
+            );
+
+        }
+
+    }
+
+
+    return loss[loss.length-1];
 
 }
