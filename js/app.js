@@ -57,6 +57,17 @@ loadButton.onclick = async () => {
         
         status.innerHTML = "Loading audio...";
 
+                const canvas =
+        document.getElementById(
+        "spectrogram"
+        );
+        
+        
+        createSpectrogram(
+            buffer,
+            canvas
+        );
+
 
         const source =
             document.querySelector(
