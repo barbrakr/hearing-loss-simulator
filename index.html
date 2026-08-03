@@ -1,50 +1,71 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-<title>Hearing Loss Simulator</title>
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
 
-<link rel="stylesheet" href="style.css">
+<meta
+name="viewport"
+content="width=device-width, initial-scale=1">
+
+<title>
+Hearing Loss Simulator
+</title>
+
+<link
+rel="stylesheet"
+href="style.css">
 
 </head>
 
 <body>
 
-<h1>Hearing Loss Simulator</h1>
+<h1>
+Hearing Loss Simulator
+</h1>
 
-<input 
-id="audiofile"
+<input
 type="file"
+id="audioFile"
 accept=".wav">
 
+<button id="loadButton">
 
-<br><br>
+Load Audio
 
-
-<button id="run">
-Simulate Hearing Loss
 </button>
 
+<hr>
 
-<br><br>
+<div id="status">
 
+No audio loaded.
 
-<audio id="player" controls></audio>
+</div>
 
+<br>
 
-<h2>Audiogram</h2>
+<button
+id="playButton"
+disabled>
 
-<div id="audiogram"></div>
+Play
 
+</button>
 
-<h2>Spectrogram</h2>
+<button
+id="stopButton"
+disabled>
 
-<canvas id="spectrogram"></canvas>
+Stop
 
+</button>
 
-<script src="app.js" defer></script>
+<script
+type="module"
+src="js/app.js">
+</script>
 
 </body>
 
