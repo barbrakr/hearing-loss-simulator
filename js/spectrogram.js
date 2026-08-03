@@ -143,6 +143,50 @@ export function drawSpectrogram(audioBuffer, canvas, name = "UNKNOWN") {
 
     ctx.putImageData(image, 0, 0);
 
+
+    // ---------- Color bar ----------
+    
+    const barWidth = 20;
+    const barX = canvas.width - 50;
+    
+    const gradient =
+        ctx.createLinearGradient(
+            0,
+            canvas.height,
+            0,
+            0
+        );
+    
+    gradient.addColorStop(0.0, "black");
+    gradient.addColorStop(0.25, "blue");
+    gradient.addColorStop(0.50, "cyan");
+    gradient.addColorStop(0.75, "yellow");
+    gradient.addColorStop(1.00, "red");
+    
+    ctx.fillStyle = gradient;
+    
+    ctx.fillRect(
+        barX,
+        0,
+        barWidth,
+        canvas.height
+    );
+    
+    // Labels
+    
+    ctx.fillStyle = "black";
+    ctx.font = "12px Arial";
+    ctx.textAlign = "left";
+    
+    ctx.fillText("0 dB",    barX + 25, 12);
+    ctx.fillText("-20",     barX + 25, canvas.height * 0.2);
+    ctx.fillText("-40",     barX + 25, canvas.height * 0.4);
+    ctx.fillText("-60",     barX + 25, canvas.height * 0.6);
+    ctx.fillText("-80",     barX + 25, canvas.height * 0.8);
+    ctx.fillText("-100",    barX + 25, canvas.height - 4);
+
+
+    canvas.width = columns + 60;
     const barX = columns + 15;
     
     const gradient =
