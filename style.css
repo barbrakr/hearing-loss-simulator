@@ -1,43 +1,31 @@
-body {
+body{
 
-font-family: Arial, sans-serif;
+font-family:Arial;
 
-padding:20px;
+max-width:900px;
 
-}
+margin:auto;
 
-
-button {
-
-font-size:18px;
-
-padding:12px;
+padding:40px;
 
 }
 
+button{
 
-canvas {
+padding:10px 20px;
 
-width:100%;
+margin:5px;
 
-height:300px;
-
-border:1px solid black;
-
-}
-
-
-table {
-
-border-collapse:collapse;
+font-size:16px;
 
 }
 
+#status{
 
-td, th {
+margin-top:20px;
 
-border:1px solid #999;
+padding:10px;
 
-padding:8px;
+background:#eeeeee;
 
 }
