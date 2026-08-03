@@ -2,42 +2,17 @@
 <html>
 
 <head>
-
-<title>
-Hearing Loss Simulator
-</title>
+<title>Hearing Loss Simulator</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<style>
-
-body {
-    font-family: Arial;
-    padding: 20px;
-}
-
-button {
-    font-size: 18px;
-    padding: 10px;
-}
-
-canvas {
-    width: 100%;
-    height: 300px;
-    border: 1px solid black;
-}
-
-</style>
+<link rel="stylesheet" href="style.css">
 
 </head>
 
-
 <body>
 
-<h1>
-Hearing Loss Simulator
-</h1>
-
+<h1>Hearing Loss Simulator</h1>
 
 <input 
 id="audiofile"
@@ -49,7 +24,7 @@ accept=".wav">
 
 
 <button id="run">
-Run simulation
+Simulate Hearing Loss
 </button>
 
 
@@ -59,17 +34,17 @@ Run simulation
 <audio id="player" controls></audio>
 
 
-<h2>
-Spectrogram
-</h2>
+<h2>Audiogram</h2>
 
+<div id="audiogram"></div>
+
+
+<h2>Spectrogram</h2>
 
 <canvas id="spectrogram"></canvas>
 
 
-
 <script src="app.js"></script>
-
 
 </body>
 
