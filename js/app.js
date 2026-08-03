@@ -1,4 +1,13 @@
 import {
+    createNoiseBuffer
+} from "./noise.js";
+
+import {
+    mixBuffers
+} from "./mixer.js";
+
+
+import {
     drawSpectrogram
 } from "./spectrogram.js";
 
