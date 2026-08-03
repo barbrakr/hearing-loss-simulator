@@ -1,4 +1,8 @@
 import {
+    createSpectrogram
+} from "./spectrogram.js";
+
+import {
     applyHearingLoss
 } from "./processor.js";
 
