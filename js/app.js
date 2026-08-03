@@ -19,6 +19,7 @@ console.log("app.js loaded");
 const engine =
     new AudioEngine();
 
+let originalBuffer = null;
 
 window.addEventListener(
 "DOMContentLoaded",
@@ -113,7 +114,7 @@ loadButton.onclick = async () => {
             "Loaded buffer:",
             buffer
         );
-
+        originalBuffer = buffer;
 
         status.innerHTML =
         `
@@ -163,10 +164,10 @@ processButton.onclick = async ()=>{
         status.innerHTML =
         "Processing hearing loss...";
 
-
+        
         const result =
             applyHearingLoss(
-                engine.buffer,
+                originalBuffer,
                 engine.context
             );
 
