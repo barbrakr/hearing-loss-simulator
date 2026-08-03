@@ -1,11 +1,76 @@
-<input type="file" id="audiofile" accept=".wav">
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>
+Hearing Loss Simulator
+</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+
+body {
+    font-family: Arial;
+    padding: 20px;
+}
+
+button {
+    font-size: 18px;
+    padding: 10px;
+}
+
+canvas {
+    width: 100%;
+    height: 300px;
+    border: 1px solid black;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+<h1>
+Hearing Loss Simulator
+</h1>
+
+
+<input 
+id="audiofile"
+type="file"
+accept=".wav">
+
+
+<br><br>
+
 
 <button id="run">
-Simulate hearing loss
+Run simulation
 </button>
 
-<canvas id="spectrogram"></canvas>
+
+<br><br>
+
 
 <audio id="player" controls></audio>
 
+
+<h2>
+Spectrogram
+</h2>
+
+
+<canvas id="spectrogram"></canvas>
+
+
+
 <script src="app.js"></script>
+
+
+</body>
+
+</html>
