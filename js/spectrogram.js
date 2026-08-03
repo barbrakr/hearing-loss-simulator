@@ -499,4 +499,16 @@ export function drawSpectrogram(
         maxFrequency
     );
 
+    let energy = 0;
+
+    for(let i=0;i<samples.length;i++){
+        energy += Math.abs(samples[i]);
+    }
+    
+    console.log(
+        name,
+        "energy:",
+        energy
+    );
+
 }
