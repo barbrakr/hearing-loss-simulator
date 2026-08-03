@@ -2,12 +2,124 @@ import {
     applyHearingLoss
 } from "./processor.js";
 
-const processButton =
-document.getElementById(
-"processButton"
-);
 
-let processedBuffer = null;
+import {
+    createAudiogram,
+    getLeftLoss,
+    getRightLoss
+} from "./audiogram.js";
+
+
+import { AudioEngine } from "./audio.js";
+
+
+console.log("app.js loaded");
+
+
+const engine =
+    new AudioEngine();
+
+
+createAudiogram();
+
+
+const loadButton =
+    document.getElementById("loadButton");
+
+const playButton =
+    document.getElementById("playButton");
+
+const stopButton =
+    document.getElementById("stopButton");
+
+const processButton =
+    document.getElementById("processButton");
+
+const status =
+    document.getElementById("status");
+
+
+
+loadButton.onclick = async () => {
+
+    try {
+
+        let buffer;
+
+        const source =
+            document.querySelector(
+                'input[name="source"]:checked'
+            ).value;
+
+
+        if(source === "sample"){
+
+            const filename =
+                document.getElementById(
+                    "sampleSelect"
+                ).value;
+
+
+            buffer =
+                await engine.loadFromURL(
+                    filename
+                );
+
+        }
+        else {
+
+            const file =
+                document.getElementById(
+                    "audioFile"
+                ).files[0];
+
+
+            if(!file){
+
+                alert(
+                    "Choose a WAV file."
+                );
+
+                return;
+
+            }
+
+
+            buffer =
+                await engine.loadFromFile(
+                    file
+                );
+
+        }
+
+
+        status.innerHTML =
+        `
+        Loaded successfully.<br>
+        Channels: ${buffer.numberOfChannels}<br>
+        Sample Rate: ${buffer.sampleRate} Hz<br>
+        Samples: ${buffer.length}
+        `;
+
+
+        playButton.disabled=false;
+        stopButton.disabled=false;
+
+
+    }
+    catch(e){
+
+        console.error(e);
+
+        status.innerHTML =
+        e.message;
+
+    }
+
+};
+
+
+
 
 
 processButton.onclick = async ()=>{
@@ -19,12 +131,13 @@ processButton.onclick = async ()=>{
 
 
         const result =
-        await applyHearingLoss(
-            engine.buffer
-        );
+            await applyHearingLoss(
+                engine.buffer
+            );
 
 
-        engine.buffer = result;
+        engine.buffer =
+            result;
 
 
         status.innerHTML =
@@ -43,78 +156,18 @@ processButton.onclick = async ()=>{
 
 };
 
-import {
-    createAudiogram,
-    getLeftLoss,
-    getRightLoss
-} from "./audiogram.js";
 
 
-import { AudioEngine } from "./audio.js";
 
-console.log("app.js loaded");
+playButton.onclick = ()=>{
 
-const engine = new AudioEngine();
-
-createAudiogram();
-
-const loadButton = document.getElementById("loadButton");
-const playButton = document.getElementById("playButton");
-const stopButton = document.getElementById("stopButton");
-const status = document.getElementById("status");
-
-loadButton.onclick = async () => {
-
-    let buffer;
-
-    const source = document.querySelector(
-        'input[name="source"]:checked'
-    ).value;
-
-    if(source === "sample"){
-
-        const filename =
-            document.getElementById("sampleSelect").value;
-
-        buffer =
-            await engine.loadFromURL(filename);
-
-    } else {
-
-        const file =
-            document.getElementById("audioFile").files[0];
-
-        if(!file){
-
-            alert("Choose a WAV file.");
-
-            return;
-        }
-
-        buffer =
-            await engine.loadFromFile(file);
-    }
-
-    status.innerHTML = `
-Loaded successfully.<br>
-Channels: ${buffer.numberOfChannels}<br>
-Sample Rate: ${buffer.sampleRate} Hz<br>
-Samples: ${buffer.length}
-`;
-
-    playButton.disabled = false;
-    stopButton.disabled = false;
-
-    console.log(engine.getLeft());
-    console.log(engine.getRight());
-
-};
-
-playButton.onclick = () => {
     engine.play();
+
 };
 
-stopButton.onclick = () => {
+
+stopButton.onclick = ()=>{
+
     engine.stop();
-};
 
+};
