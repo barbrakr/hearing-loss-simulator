@@ -226,8 +226,17 @@ function processChannel(
             output[i]=-1;
 
     }
-
-
+    
+    for(let i=0;i<output.length;i++){
+    
+        if(windowSum[i] > 0){
+    
+            output[i] /=
+                windowSum[i];
+    
+        }
+    
+    }
     return output;
 
 }
