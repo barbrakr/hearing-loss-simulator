@@ -13,8 +13,6 @@ const frequencies = [
 ];
 
 
-// hearing loss in dB
-
 let loss = [
 10,
 11,
@@ -22,112 +20,164 @@ let loss = [
 35,
 55,
 53,
-50,
-55,
-34,
+56,
+44,
+28,
 18,
 13
 ];
 
 
 
-document
-.getElementById("run")
-.onclick = async function(){
+function createAudiogram(){
+
+let html="<table>";
+
+html += "<tr><th>Hz</th><th>Loss dB</th></tr>";
 
 
-const file =
+for(let i=0;i<frequencies.length;i++){
+
+html += `
+<tr>
+<td>${frequencies[i]}</td>
+
+<td>
+<input 
+class="loss"
+type="number"
+value="${loss[i]}">
+</td>
+
+</tr>
+`;
+
+}
+
+
+html+="</table>";
+
+document.getElementById(
+"audiogram"
+).innerHTML=html;
+
+}
+
+
+createAudiogram();
+
+
+
+function getLoss(){
+
+return [...document.querySelectorAll(".loss")]
+.map(x=>Number(x.value));
+
+}
+
+
+
+
+document.getElementById("run")
+.onclick = async ()=>{
+
+
+let file =
 document.getElementById("audiofile")
 .files[0];
 
 
 if(!file){
-alert("Choose a WAV file");
+
+alert("Choose WAV file");
+
 return;
+
 }
 
 
 
-const audioContext =
+let context =
 new AudioContext();
 
 
 
-const arrayBuffer =
+let data =
 await file.arrayBuffer();
 
 
 
-const audioBuffer =
-await audioContext.decodeAudioData(
-arrayBuffer
-);
+let buffer =
+await context.decodeAudioData(data);
 
 
 
-const source =
-audioContext.createBufferSource();
+let source =
+context.createBufferSource();
 
 
-source.buffer =
-audioBuffer;
+source.buffer=buffer;
 
 
 
-// create hearing loss filters
+let losses=getLoss();
 
-let filters=[];
+
+let previous=source;
+
 
 
 for(let i=0;i<frequencies.length;i++){
 
 
 let filter =
-audioContext.createBiquadFilter();
+context.createBiquadFilter();
 
 
 filter.type="peaking";
+
 
 filter.frequency.value =
 frequencies[i];
 
 
-filter.Q.value =
-1;
+filter.Q.value=1;
 
 
-// attenuation
+// simulate hearing loss
 
 filter.gain.value =
--loss[i];
+-losses[i];
 
 
-filters.push(filter);
+previous.connect(filter);
+
+
+previous=filter;
+
 
 }
 
 
 
-
-// connect filters
-
-source.connect(filters[0]);
+let analyser =
+context.createAnalyser();
 
 
-for(let i=0;i<filters.length-1;i++){
+analyser.fftSize=2048;
 
-filters[i].connect(
-filters[i+1]
+
+previous.connect(analyser);
+
+
+analyser.connect(
+context.destination
 );
 
-}
 
 
-
-filters[
-filters.length-1
-].connect(
-audioContext.destination
+drawSpectrogram(
+analyser
 );
 
 
@@ -135,5 +185,84 @@ audioContext.destination
 source.start();
 
 
-
 };
+
+
+
+
+
+function drawSpectrogram(analyser){
+
+
+let canvas =
+document.getElementById(
+"spectrogram"
+);
+
+
+let ctx =
+canvas.getContext("2d");
+
+
+canvas.width=800;
+canvas.height=300;
+
+
+let data =
+new Uint8Array(
+analyser.frequencyBinCount
+);
+
+
+
+function draw(){
+
+
+requestAnimationFrame(draw);
+
+
+analyser.getByteFrequencyData(data);
+
+
+
+ctx.drawImage(
+canvas,
+-1,
+0
+);
+
+
+
+for(let y=0;y<canvas.height;y++){
+
+
+let index =
+Math.floor(
+y/data.length*data.length
+);
+
+
+let value=data[index];
+
+
+ctx.fillStyle =
+`rgb(${value},${value/2},0)`;
+
+
+ctx.fillRect(
+canvas.width-1,
+canvas.height-y,
+1,
+1
+);
+
+
+}
+
+}
+
+
+draw();
+
+
+}
