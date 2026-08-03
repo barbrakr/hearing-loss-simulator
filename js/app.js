@@ -41,7 +41,14 @@ const noiseButton =
 
 
 noiseButton.onclick = ()=>{
-
+    if(!engine.buffer){
+    
+        status.innerHTML =
+            "Load audio first.";
+    
+        return;
+    
+    }
 
     const type =
         document.getElementById(
