@@ -323,6 +323,18 @@ processButton.onclick = async ()=>{
         status.innerHTML =
         "Hearing loss applied";
 
+                
+        console.log(
+            "Before loss:",
+            engine.buffer.getChannelData(0)[10000]
+        );
+        
+        console.log(
+            "After loss:",
+            result.getChannelData(0)[10000]
+        );
+
+
 
     }
     catch(e){
@@ -351,13 +363,3 @@ stopButton.onclick = ()=>{
 
 };
 
-
-console.log(
-    "Before loss:",
-    engine.buffer.getChannelData(0)[10000]
-);
-
-console.log(
-    "After loss:",
-    result.getChannelData(0)[10000]
-);
