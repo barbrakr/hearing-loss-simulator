@@ -15,75 +15,40 @@ for(let i=0;i<fftSize;i++){
 
 }
 
-export function drawSpectrogram(
-    audioBuffer,
-    canvas,
-    name="UNKNOWN"
-){
+export function drawSpectrogram(audioBuffer, canvas, name="UNKNOWN"){
+
+    const ctx = canvas.getContext("2d");
+
+    const samples = audioBuffer.getChannelData(0);
+
+    const sampleRate = audioBuffer.sampleRate;
 
     const fftSize = 2048;
 
     const hop = fftSize / 2;
-    
+
     const window = new Float32Array(fftSize);
-    
+
     for(let i = 0; i < fftSize; i++){
-    
+
         window[i] =
             0.5 -
             0.5 *
             Math.cos(
                 2 * Math.PI * i / (fftSize - 1)
             );
-    
+
     }
-    
+
     const columns =
         Math.floor(
             (samples.length - fftSize) / hop
         );
-    
+
     const rows = fftSize / 2;
 
-
-    
-    console.log("Hop:", hop);
-    console.log("Window[100]:", WINDOW[100]);
-    
-    const ctx =
-        canvas.getContext("2d");
-
-
-    const samples =
-        audioBuffer.getChannelData(0);
-
-
-    const sampleRate =
-        audioBuffer.sampleRate;
-
-
-    const fftSize = FFT_SIZE;
-    const hop = HOP_SIZE;
-
-
-    const columns =
-        Math.floor(
-            (samples.length-fftSize)
-            /
-            hop
-        );
-
-
-    const rows =
-        fftSize/2;
-
-
-    canvas.width =
-        columns;
-
-    canvas.height =
-        rows;
-
+    canvas.width = columns;
+    canvas.height = rows;
 
     const image =
         ctx.createImageData(
@@ -91,18 +56,8 @@ export function drawSpectrogram(
             rows
         );
 
-
-    const re =
-        new Float32Array(
-            fftSize
-        );
-
-
-    const im =
-        new Float32Array(
-            fftSize
-        );
-
+    const re = new Float32Array(fftSize);
+    const im = new Float32Array(fftSize);
 
 
     for(
@@ -124,7 +79,7 @@ export function drawSpectrogram(
         re[i] =
             (samples[offset+i] || 0)
             *
-            WINDOW[i];
+            window[i];
 
             im[i]=0;
 
