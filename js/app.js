@@ -271,7 +271,7 @@ processButton.onclick = async ()=>{
 
         const result =
             applyHearingLoss(
-                originalBuffer,
+                engine.buffer,
                 engine.context
             );
 
@@ -312,13 +312,10 @@ processButton.onclick = async ()=>{
         );     
 
         engine.buffer = result;
-
         
         drawSpectrogram(
-            result,
-            document.getElementById(
-                "lossSpectrogram"
-            ),
+            engine.buffer,
+            lossCanvas,
             "LOSS"
         );
 
@@ -353,3 +350,14 @@ stopButton.onclick = ()=>{
     engine.stop();
 
 };
+
+
+console.log(
+    "Before loss:",
+    engine.buffer.getChannelData(0)[10000]
+);
+
+console.log(
+    "After loss:",
+    result.getChannelData(0)[10000]
+);
