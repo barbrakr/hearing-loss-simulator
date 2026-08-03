@@ -188,10 +188,12 @@ function processChannel(
             );
 
 
+            const simulationFactor = 0.5;
+            
             const gain =
             Math.pow(
                 10,
-                -db/20
+                (-db * simulationFactor) / 20
             );
 
 
