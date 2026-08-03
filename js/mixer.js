@@ -4,6 +4,26 @@ export function mixBuffers(
     noiseLevel = 0.2
 ){
 
+
+        if(i === 10000){
+    
+        console.log(
+            "Original:",
+            source[i]
+        );
+    
+        console.log(
+            "Noise:",
+            noiseData[i]
+        );
+    
+        console.log(
+            "Mixed:",
+            out[i]
+        );
+    
+    }
+
     const length =
         main.length;
 
