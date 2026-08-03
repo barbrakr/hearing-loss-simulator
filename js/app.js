@@ -34,11 +34,8 @@ const engine =
 
 let originalBuffer = null;
 
-const originalCanvas =
-    document.getElementById("originalSpectrogram");
-
-const lossCanvas =
-    document.getElementById("lossSpectrogram");
+let originalCanvas = null;
+let lossCanvas = null;
 
 const noiseButton =
     document.getElementById(
@@ -78,6 +75,12 @@ noiseButton.onclick = ()=>{
             0.15
         );
 
+        drawSpectrogram(
+        engine.buffer,
+        originalCanvas,
+        "NOISY"
+    );
+
 
     status.innerHTML =
         "Background noise added";
@@ -89,6 +92,25 @@ window.addEventListener(
 ()=>{
 
     createAudiogram();
+
+
+    originalCanvas =
+        document.getElementById(
+            "originalSpectrogram"
+        );
+
+
+    lossCanvas =
+        document.getElementById(
+            "lossSpectrogram"
+        );
+
+
+    console.log(
+        "Canvas:",
+        originalCanvas,
+        lossCanvas
+    );
 
 });
 
