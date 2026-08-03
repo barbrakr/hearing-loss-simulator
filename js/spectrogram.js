@@ -41,8 +41,8 @@ export function drawSpectrogram(audioBuffer, canvas, name = "UNKNOWN") {
     const re = new Float32Array(fftSize);
     const im = new Float32Array(fftSize);
 
-    const minDb = -100;
-    const maxDb = 0;
+    const minDb = -60;
+    const maxDb = -10;
 
     for (let x = 0; x < columns; x++) {
 
