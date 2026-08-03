@@ -7,7 +7,7 @@ import {
 export function drawSpectrogram(
     audioBuffer,
     canvas,
-    name
+    name="UNKNOWN"
 ){
 
     const ctx =
