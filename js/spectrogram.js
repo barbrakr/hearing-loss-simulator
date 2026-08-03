@@ -1,15 +1,23 @@
 import {
-    FFT_SIZE,
-    HOP_SIZE,
-    WINDOW
-} from "./stftConfig.js";
-
-
-import {
     fft,
     ifft
 } from "./dsp.js";
 
+const fftSize = 2048;
+const hop = fftSize / 2;
+
+const window = new Float32Array(fftSize);
+
+for(let i=0;i<fftSize;i++){
+
+    window[i] =
+        0.5 -
+        0.5 *
+        Math.cos(
+            2*Math.PI*i/(fftSize-1)
+        );
+
+}
 
 export function drawSpectrogram(
     audioBuffer,
