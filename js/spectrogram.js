@@ -196,7 +196,6 @@ export function drawSpectrogram(audioBuffer, canvas, name = "UNKNOWN") {
     // ---------- Color bar ----------
     
     const barWidth = 20;
-    const barX = canvas.width - 50;
     
     const gradient =
         ctx.createLinearGradient(
