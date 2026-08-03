@@ -1,8 +1,17 @@
+import {
+    createAudiogram,
+    getLeftLoss,
+    getRightLoss
+} from "./audiogram.js";
+
+
 import { AudioEngine } from "./audio.js";
 
 console.log("app.js loaded");
 
 const engine = new AudioEngine();
+
+createAudiogram();
 
 const loadButton = document.getElementById("loadButton");
 const playButton = document.getElementById("playButton");
