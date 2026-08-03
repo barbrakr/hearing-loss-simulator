@@ -1,4 +1,10 @@
-export function createSpectrogram(
+import {
+    fft,
+    ifft
+} from "./dsp.js";
+
+
+export function drawSpectrogram(
     audioBuffer,
     canvas
 ){
@@ -7,7 +13,7 @@ export function createSpectrogram(
         canvas.getContext("2d");
 
 
-    const data =
+    const samples =
         audioBuffer.getChannelData(0);
 
 
@@ -20,107 +26,127 @@ export function createSpectrogram(
     const hop = 512;
 
 
-    const frames =
+    const columns =
         Math.floor(
-            (data.length - fftSize) / hop
+            (samples.length-fftSize)
+            /
+            hop
         );
 
 
-    const bins =
-        fftSize / 2;
+    const rows =
+        fftSize/2;
 
 
-    canvas.width = frames;
-    canvas.height = bins;
+    canvas.width =
+        columns;
+
+    canvas.height =
+        rows;
 
 
     const image =
         ctx.createImageData(
-            frames,
-            bins
+            columns,
+            rows
         );
+
+
+    const re =
+        new Float32Array(
+            fftSize
+        );
+
+
+    const im =
+        new Float32Array(
+            fftSize
+        );
+
 
 
     for(
         let x=0;
-        x<frames;
+        x<columns;
         x++
     ){
 
-        const offset =
-            x * hop;
+        let offset =
+            x*hop;
+
+
+        for(
+            let i=0;
+            i<fftSize;
+            i++
+        ){
+
+            re[i] =
+                samples[offset+i] || 0;
+
+            im[i]=0;
+
+        }
+
+
+        fft(re,im);
+
 
 
         for(
             let y=0;
-            y<bins;
+            y<rows;
             y++
         ){
 
-            let magnitude = 0;
-
-
-            // simple FFT placeholder
-            // replaced below
-
-            const index =
-                offset + y;
-
-
-            if(index < data.length){
-
-                magnitude =
-                    Math.abs(
-                        data[index]
-                    );
-
-            }
-
-
-            let db =
-                20 *
-                Math.log10(
-                    magnitude + 0.00001
+            const magnitude =
+                Math.sqrt(
+                    re[y]*re[y]
+                    +
+                    im[y]*im[y]
                 );
 
 
-            db =
+            const db =
+                20 *
+                Math.log10(
+                    magnitude + 0.000001
+                );
+
+
+            const value =
                 Math.max(
-                    -100,
+                    0,
                     Math.min(
-                        0,
-                        db
+                        255,
+                        (db+100)*2.55
                     )
                 );
 
 
-            const colour =
-                dbToColour(db);
-
-
             const pixel =
                 (
-                    y * frames + x
+                    (rows-y-1)
+                    *
+                    columns
+                    +
+                    x
                 )
-                * 4;
+                *
+                4;
 
 
-            image.data[pixel] =
-                colour.r;
+            image.data[pixel]=value;
 
+            image.data[pixel+1]=value/2;
 
-            image.data[pixel+1] =
-                colour.g;
+            image.data[pixel+2]=255-value;
 
+            image.data[pixel+3]=255;
 
-            image.data[pixel+2] =
-                colour.b;
-
-
-            image.data[pixel+3] =
-                255;
 
         }
+
 
     }
 
@@ -132,68 +158,11 @@ export function createSpectrogram(
     );
 
 
-    drawAxes(
-        canvas,
-        sampleRate,
-        data.length
-    );
-
-}
-
-
-
-function dbToColour(db){
-
-    const value =
-        (db + 100) / 100;
-
-
-    return {
-
-        r:
-            Math.floor(
-                255 * value
-            ),
-
-        g:
-            Math.floor(
-                255 * value * value
-            ),
-
-        b:
-            255 -
-            Math.floor(
-                255 * value
-            )
-
-    };
-
-}
-
-
-
-function drawAxes(
-    canvas,
-    sampleRate,
-    length
-){
-
-    const ctx =
-        canvas.getContext("2d");
-
-
-    ctx.font="12px Arial";
-
-
-    const duration =
-        length /
-        sampleRate;
-
-
     console.log(
-        "Duration:",
-        duration,
-        "seconds"
+        "Spectrogram:",
+        columns,
+        "x",
+        rows
     );
 
 }
