@@ -5,11 +5,16 @@ import {
 } from "./audiogram.js";
 
 
-export async function applyHearingLoss(audioBuffer, context){
+export async function applyHearingLoss(audioBuffer){
+
+
+    const channels =
+        audioBuffer.numberOfChannels;
+
 
     const offline =
         new OfflineAudioContext(
-            audioBuffer.numberOfChannels,
+            channels,
             audioBuffer.length,
             audioBuffer.sampleRate
         );
@@ -18,59 +23,96 @@ export async function applyHearingLoss(audioBuffer, context){
     const source =
         offline.createBufferSource();
 
+
     source.buffer =
         audioBuffer;
 
 
-
-    const splitter =
-        offline.createChannelSplitter(2);
-
-
     const merger =
-        offline.createChannelMerger(2);
-
-
-
-    source.connect(splitter);
-
-
-
-    const left =
-        createEarFilter(
-            offline,
-            getLeftLoss()
+        offline.createChannelMerger(
+            channels
         );
 
 
-    const right =
-        createEarFilter(
-            offline,
-            getRightLoss()
+    if(channels === 1){
+
+        const filter =
+            createEarFilter(
+                offline,
+                getLeftLoss()
+            );
+
+
+        source
+        .connect(filter.input);
+
+
+        filter.output
+        .connect(
+            offline.destination
         );
 
 
-    splitter.connect(left.input,0);
-    splitter.connect(right.input,1);
+    }
 
 
-    left.output.connect(
-        merger,
-        0,
-        0
-    );
+    else {
 
 
-    right.output.connect(
-        merger,
-        0,
-        1
-    );
+        const splitter =
+            offline.createChannelSplitter(2);
 
 
-    merger.connect(
-        offline.destination
-    );
+        source.connect(splitter);
+
+
+
+        const left =
+            createEarFilter(
+                offline,
+                getLeftLoss()
+            );
+
+
+        const right =
+            createEarFilter(
+                offline,
+                getRightLoss()
+            );
+
+
+
+        splitter.connect(
+            left.input,
+            0
+        );
+
+
+        splitter.connect(
+            right.input,
+            1
+        );
+
+
+        left.output.connect(
+            merger,
+            0,
+            0
+        );
+
+
+        right.output.connect(
+            merger,
+            0,
+            1
+        );
+
+
+        merger.connect(
+            offline.destination
+        );
+
+    }
 
 
     source.start();
@@ -82,7 +124,9 @@ export async function applyHearingLoss(audioBuffer, context){
 
 
 
+
 function createEarFilter(context,loss){
+
 
     let input =
         context.createGain();
@@ -93,11 +137,13 @@ function createEarFilter(context,loss){
 
     for(let i=0;i<frequencies.length;i++){
 
+
         let filter =
             context.createBiquadFilter();
 
 
         filter.type="peaking";
+
 
         filter.frequency.value =
             frequencies[i];
@@ -107,11 +153,18 @@ function createEarFilter(context,loss){
             0.7;
 
 
+        // temporary limit
+        // so we can hear it working
+
         filter.gain.value =
-            -loss[i];
+            -Math.min(
+                loss[i],
+                35
+            );
 
 
         previous.connect(filter);
+
 
         previous=filter;
 
