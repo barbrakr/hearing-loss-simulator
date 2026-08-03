@@ -102,6 +102,12 @@ const processButton =
 const status =
     document.getElementById("status");
 
+const originalCanvas =
+    document.getElementById("originalSpectrogram");
+
+const lossCanvas =
+    document.getElementById("lossSpectrogram");
+
 
 
 loadButton.onclick = async () => {
