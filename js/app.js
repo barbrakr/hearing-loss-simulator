@@ -173,8 +173,7 @@ processButton.onclick = async ()=>{
 
     try {
 
-
-        if(!engine.buffer){
+        if(!originalBuffer){
 
             status.innerHTML =
             "No audio loaded.";
@@ -187,7 +186,7 @@ processButton.onclick = async ()=>{
         status.innerHTML =
         "Processing hearing loss...";
 
-        
+
         const result =
             applyHearingLoss(
                 originalBuffer,
@@ -196,8 +195,8 @@ processButton.onclick = async ()=>{
 
 
         engine.buffer = result;
-        
-        
+
+
         drawSpectrogram(
             result,
             document.getElementById(
@@ -221,7 +220,6 @@ processButton.onclick = async ()=>{
     }
 
 };
-
 
 
 
