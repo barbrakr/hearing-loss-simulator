@@ -195,8 +195,15 @@ processButton.onclick = async ()=>{
             );
 
 
-        engine.buffer =
-            result;
+        engine.buffer = result;
+        
+        
+        drawSpectrogram(
+            result,
+            document.getElementById(
+                "lossSpectrogram"
+            )
+        );
 
 
         status.innerHTML =
