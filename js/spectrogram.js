@@ -1,21 +1,6 @@
-import {
-    fft,
-    ifft
-} from "./dsp.js";
+import { fft } from "./dsp.js";
 
-
-for(let i=0;i<fftSize;i++){
-
-    window[i] =
-        0.5 -
-        0.5 *
-        Math.cos(
-            2*Math.PI*i/(fftSize-1)
-        );
-
-}
-
-export function drawSpectrogram(audioBuffer, canvas, name="UNKNOWN"){
+export function drawSpectrogram(audioBuffer, canvas, name = "UNKNOWN") {
 
     const ctx = canvas.getContext("2d");
 
@@ -24,12 +9,23 @@ export function drawSpectrogram(audioBuffer, canvas, name="UNKNOWN"){
     const sampleRate = audioBuffer.sampleRate;
 
     const fftSize = 2048;
-
     const hop = fftSize / 2;
+
+    const rows = fftSize / 2;
+    const columns = Math.floor((samples.length - fftSize) / hop);
+
+    canvas.width = columns;
+    canvas.height = rows;
+
+    const image = ctx.createImageData(columns, rows);
+
+    //----------------------------------------------------
+    // Hann window (same as processor)
+    //----------------------------------------------------
 
     const window = new Float32Array(fftSize);
 
-    for(let i = 0; i < fftSize; i++){
+    for (let i = 0; i < fftSize; i++) {
 
         window[i] =
             0.5 -
@@ -40,153 +36,96 @@ export function drawSpectrogram(audioBuffer, canvas, name="UNKNOWN"){
 
     }
 
-    const columns =
-        Math.floor(
-            (samples.length - fftSize) / hop
-        );
-
-    const rows = fftSize / 2;
-
-    canvas.width = columns;
-    canvas.height = rows;
-
-    const image =
-        ctx.createImageData(
-            columns,
-            rows
-        );
+    //----------------------------------------------------
 
     const re = new Float32Array(fftSize);
     const im = new Float32Array(fftSize);
 
+    const minDb = -100;
+    const maxDb = 0;
 
-    for(
-        let x=0;
-        x<columns;
-        x++
-    ){
+    for (let x = 0; x < columns; x++) {
 
-        let offset =
-            x*hop;
+        const offset = x * hop;
 
+        //------------------------------------------------
+        // Window signal
+        //------------------------------------------------
 
-        for(
-            let i=0;
-            i<fftSize;
-            i++
-        ){
+        for (let i = 0; i < fftSize; i++) {
 
-        re[i] =
-            (samples[offset+i] || 0)
-            *
-            window[i];
+            re[i] =
+                (samples[offset + i] || 0)
+                * window[i];
 
-            im[i]=0;
+            im[i] = 0;
 
         }
 
+        fft(re, im);
 
-        fft(re,im);
-        
-        if (x === 200) {
-        
-            console.log(
-                name,
-                "1 kHz magnitude:",
+        //------------------------------------------------
+        // Magnitude
+        //------------------------------------------------
+
+        for (let y = 0; y < rows; y++) {
+
+            const magnitude =
                 Math.sqrt(
-                    re[46]*re[46] +
-                    im[46]*im[46]
-                )
-            );
-        
-            console.log(
-                name,
-                "4 kHz magnitude:",
-                Math.sqrt(
-                    re[186]*re[186] +
-                    im[186]*im[186]
-                )
-            );
-        
-        }
+                    re[y] * re[y] +
+                    im[y] * im[y]
+                ) / (fftSize / 2);
 
-
-        for(
-            let y=0;
-            y<rows;
-            y++
-        ){
-        
-        const magnitude =
-            Math.sqrt(
-                re[y] * re[y] +
-                im[y] * im[y]
-            ) / (fftSize / 2);
-        
-        const db =
-            20 * Math.log10(
-                Math.max(magnitude, 1e-10)
-            );
-
-
-            const minDb = -100;
-            const maxDb = 0;
-            
-            
-            const value =
-                Math.round(
-                    255 *
+            const db =
+                20 *
+                Math.log10(
                     Math.max(
-                        0,
-                        Math.min(
-                            1,
-                            (db + 100) / 100
-                        )
+                        magnitude,
+                        1e-10
                     )
                 );
 
+            let value =
+                (db - minDb) /
+                (maxDb - minDb);
+
+            value =
+                Math.max(
+                    0,
+                    Math.min(
+                        1,
+                        value
+                    )
+                );
+
+            const gray =
+                Math.round(
+                    value * 255
+                );
 
             const pixel =
                 (
-                    (rows-y-1)
-                    *
-                    columns
-                    +
-                    x
-                )
-                *
-                4;
+                    (rows - 1 - y)
+                    * columns
+                    + x
+                ) * 4;
 
-
-            image.data[pixel]=value;
-
-            image.data[pixel+1]=value/2;
-
-            image.data[pixel+2]=255-value;
-
-            image.data[pixel+3]=255;
-
+            image.data[pixel] = gray;
+            image.data[pixel + 1] = gray;
+            image.data[pixel + 2] = gray;
+            image.data[pixel + 3] = 255;
 
         }
 
-
     }
 
+    ctx.putImageData(image, 0, 0);
 
-    ctx.putImageData(
-        image,
-        0,
-        0
-    );
-
-    
     console.log(
-        "Spectrogram:",
         name,
         columns,
+        "frames",
         rows,
-        "Hz max:",
-        sampleRate/2
+        "frequency bins"
     );
-
 }
