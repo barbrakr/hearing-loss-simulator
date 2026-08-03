@@ -34,6 +34,12 @@ const engine =
 
 let originalBuffer = null;
 
+const originalCanvas =
+    document.getElementById("originalSpectrogram");
+
+const lossCanvas =
+    document.getElementById("lossSpectrogram");
+
 const noiseButton =
     document.getElementById(
         "noiseButton"
@@ -102,11 +108,7 @@ const processButton =
 const status =
     document.getElementById("status");
 
-const originalCanvas =
-    document.getElementById("originalSpectrogram");
 
-const lossCanvas =
-    document.getElementById("lossSpectrogram");
 
 
 
