@@ -131,6 +131,14 @@ loadButton.onclick = async () => {
         );
         originalBuffer = buffer;
 
+
+                drawSpectrogram(
+            buffer,
+            document.getElementById(
+                "originalSpectrogram"
+            )
+        );
+
         status.innerHTML =
         `
         Audio loaded.<br>
