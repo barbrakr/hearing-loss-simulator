@@ -141,10 +141,11 @@ loadButton.onclick = async () => {
 
 
         drawSpectrogram(
-            loadedBuffer,
+            originalBuffer,
             document.getElementById(
                 "originalSpectrogram"
-            )
+            ),
+            "ORIGINAL"
         );
 
 
@@ -231,12 +232,13 @@ processButton.onclick = async ()=>{
 
         engine.buffer = result;
 
-
+        
         drawSpectrogram(
             result,
             document.getElementById(
                 "lossSpectrogram"
-            )
+            ),
+            "LOSS"
         );
 
 
