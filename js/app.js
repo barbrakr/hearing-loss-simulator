@@ -185,13 +185,11 @@ loadButton.onclick = async () => {
         ${loadedBuffer.length}
         `;
 
-
+        
         drawSpectrogram(
-            originalBuffer,
-            document.getElementById(
-                "originalSpectrogram"
-            ),
-            "ORIGINAL"
+            engine.buffer,
+            originalCanvas,
+            "CURRENT"
         );
 
 
