@@ -47,12 +47,17 @@ export function drawSpectrogram(
 
     const colorBarWidth = 100;
 
-
+    const leftMargin = 60;
+    const bottomMargin = 40;
+    
     canvas.width =
-        columns + colorBarWidth;
-
+        leftMargin +
+        columns +
+        colorBarWidth;
+    
     canvas.height =
-        rows;
+        rows +
+        bottomMargin;
 
 
 
@@ -299,10 +304,9 @@ export function drawSpectrogram(
 
     ctx.putImageData(
         image,
-        0,
+        leftMargin,
         0
     );
-
 
 
     // -----------------------------
