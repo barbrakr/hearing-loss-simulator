@@ -30,11 +30,68 @@ document.getElementById(
 
 loadButton.onclick = async ()=>{
 
-    console.log("Load button clicked");
+    let buffer;
 
-    const file =
-    document.getElementById("audioFile").files[0];
-}
+    const source =
+        document.querySelector(
+            'input[name="source"]:checked'
+        ).value;
+
+    if(source==="sample"){
+
+        const filename =
+            document.getElementById(
+                "sampleSelect"
+            ).value;
+
+        buffer =
+            await engine.loadFromURL(
+                filename
+            );
+
+    }
+
+    else{
+
+        const file =
+            document.getElementById(
+                "audioFile"
+            ).files[0];
+
+        if(!file){
+
+            alert(
+                "Choose a WAV file."
+            );
+
+            return;
+
+        }
+
+        buffer =
+            await engine.loadFromFile(
+                file
+            );
+
+    }
+
+    status.innerHTML = `
+Loaded successfully.<br>
+
+Channels:
+${buffer.numberOfChannels}<br>
+
+Sample Rate:
+${buffer.sampleRate} Hz<br>
+
+Samples:
+${buffer.length}
+`;
+
+    playButton.disabled = false;
+    stopButton.disabled = false;
+
+};
 
 if(!file){
 
