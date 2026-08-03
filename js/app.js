@@ -1,110 +1,65 @@
-console.log("app.js loaded");
-
 import { AudioEngine } from "./audio.js";
 
+console.log("app.js loaded");
 
-const engine =
-new AudioEngine();
+const engine = new AudioEngine();
 
+const loadButton = document.getElementById("loadButton");
+const playButton = document.getElementById("playButton");
+const stopButton = document.getElementById("stopButton");
+const status = document.getElementById("status");
 
-const loadButton =
-document.getElementById(
-"loadButton"
-);
-
-const playButton =
-document.getElementById(
-"playButton"
-);
-
-const stopButton =
-document.getElementById(
-"stopButton"
-);
-
-const status =
-document.getElementById(
-"status"
-);
-
-
-loadButton.onclick = async ()=>{
+loadButton.onclick = async () => {
 
     let buffer;
 
-    const source =
-        document.querySelector(
-            'input[name="source"]:checked'
-        ).value;
+    const source = document.querySelector(
+        'input[name="source"]:checked'
+    ).value;
 
-    if(source==="sample"){
+    if(source === "sample"){
 
         const filename =
-            document.getElementById(
-                "sampleSelect"
-            ).value;
+            document.getElementById("sampleSelect").value;
 
         buffer =
-            await engine.loadFromURL(
-                filename
-            );
+            await engine.loadFromURL(filename);
 
-    }
-
-    else{
+    } else {
 
         const file =
-            document.getElementById(
-                "audioFile"
-            ).files[0];
+            document.getElementById("audioFile").files[0];
 
         if(!file){
 
-            alert(
-                "Choose a WAV file."
-            );
+            alert("Choose a WAV file.");
 
             return;
-
         }
 
         buffer =
-            await engine.loadFromFile(
-                file
-            );
-
+            await engine.loadFromFile(file);
     }
 
     status.innerHTML = `
 Loaded successfully.<br>
-
-Channels:
-${buffer.numberOfChannels}<br>
-
-Sample Rate:
-${buffer.sampleRate} Hz<br>
-
-Samples:
-${buffer.length}
+Channels: ${buffer.numberOfChannels}<br>
+Sample Rate: ${buffer.sampleRate} Hz<br>
+Samples: ${buffer.length}
 `;
 
     playButton.disabled = false;
     stopButton.disabled = false;
 
-};
-
-
-
-
-playButton.onclick=()=>{
-
-engine.play();
+    console.log(engine.getLeft());
+    console.log(engine.getRight());
 
 };
 
+playButton.onclick = () => {
+    engine.play();
+};
 
-stopButton.onclick=()=>{
-
-engine.stop();
-
+stopButton.onclick = () => {
+    engine.stop();
 };
