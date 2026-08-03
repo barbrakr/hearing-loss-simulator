@@ -124,7 +124,7 @@ function processChannel(
             );
 
 
-            const simulationStrength = 0.25;
+            const simulationStrength = 0.5;
             
             const gain =
                 Math.pow(
