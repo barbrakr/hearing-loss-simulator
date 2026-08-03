@@ -10,19 +10,15 @@ import {
 } from "./dsp.js";
 
 
-export function applyHearingLoss(buffer){
+export function applyHearingLoss(buffer, context){
 
 
-    const result =
-        new AudioBuffer({
-
-            length: buffer.length,
-
-            numberOfChannels: 2,
-
-            sampleRate: buffer.sampleRate
-
-        });
+const result =
+    context.createBuffer(
+        2,
+        buffer.length,
+        buffer.sampleRate
+    );
 
 
     const left =
