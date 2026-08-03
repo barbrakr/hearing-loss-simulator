@@ -214,25 +214,28 @@ function processChannel(
     */
 
     for(let i=0;i<output.length;i++){
-
-        if(output[i] > 1)
-            output[i]=1;
-
-        if(output[i] < -1)
-            output[i]=-1;
-
-    }
-    
-    for(let i=0;i<output.length;i++){
     
         if(windowSum[i] > 0){
     
-            output[i] /=
-                windowSum[i];
+            output[i] /= windowSum[i];
     
         }
     
     }
+    
+    
+    for(let i=0;i<output.length;i++){
+    
+        if(output[i] > 1)
+            output[i]=1;
+    
+        if(output[i] < -1)
+            output[i]=-1;
+    
+    }
+
+
+return output;
     return output;
 
 }
