@@ -42,7 +42,7 @@ export async function applyHearingLoss(audioBuffer){
             1;
 
         filter.gain.value =
-            -loss[i] * 0.15;
+        -loss[i];
 
 
         node.connect(filter);
@@ -50,7 +50,18 @@ export async function applyHearingLoss(audioBuffer){
         node = filter;
     }
 
+        const makeup =
+        context.createGain();
+        
+        makeup.gain.value = 2;
+        
+        node.connect(makeup);
+        
+        makeup.connect(
+            context.destination
+        );
 
+    
     node.connect(
         context.destination
     );
