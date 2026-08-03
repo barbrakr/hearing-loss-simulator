@@ -417,6 +417,70 @@ export function drawSpectrogram(
     );
 
 
+    // -----------------------------
+    // Axis labels
+    // -----------------------------
+    
+    ctx.fillStyle = "black";
+    ctx.font = "12px Arial";
+    
+    
+    // X axis time
+    
+    const duration =
+        audioBuffer.duration;
+    
+    
+    const timeSteps = 10;
+    
+    
+    for(let i = 0; i <= timeSteps; i++){
+    
+        const x =
+            leftMargin +
+            (i / timeSteps) *
+            columns;
+    
+    
+        ctx.fillText(
+            (
+                duration *
+                i /
+                timeSteps
+            ).toFixed(1) + " s",
+            x - 10,
+            rows + 25
+        );
+    
+    }
+    
+    
+    // Y axis frequency
+    
+    for(
+        let f = 0;
+        f <= 10000;
+        f += 2000
+    ){
+    
+        const y =
+            rows -
+            (
+                f /
+                10000
+            )
+            *
+            rows;
+    
+    
+        ctx.fillText(
+            f + " Hz",
+            5,
+            y + 4
+        );
+    
+    }
+
 
     console.log(
         name,
