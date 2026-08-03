@@ -49,7 +49,17 @@ const status =
 loadButton.onclick = async () => {
 
     try {
+        
+        if(!engine.buffer){
 
+            status.innerHTML =
+            "No audio loaded.";
+
+            return;
+
+        }
+
+        
         status.innerHTML = "Loading audio...";
 
 
