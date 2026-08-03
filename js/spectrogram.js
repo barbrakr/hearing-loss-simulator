@@ -91,7 +91,28 @@ export function drawSpectrogram(
 
 
         fft(re,im);
-
+        
+        if (x === 200) {
+        
+            console.log(
+                name,
+                "1 kHz magnitude:",
+                Math.sqrt(
+                    re[46]*re[46] +
+                    im[46]*im[46]
+                )
+            );
+        
+            console.log(
+                name,
+                "4 kHz magnitude:",
+                Math.sqrt(
+                    re[186]*re[186] +
+                    im[186]*im[186]
+                )
+            );
+        
+        }
 
 
         for(
