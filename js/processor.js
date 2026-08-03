@@ -234,8 +234,6 @@ function processChannel(
     
     }
 
-
-return output;
     return output;
 
 }
