@@ -17,6 +17,9 @@ export function drawSpectrogram(
     name="UNKNOWN"
 ){
 
+    console.log("Hop:", hop);
+    console.log("Window[100]:", WINDOW[100]);
+    
     const ctx =
         canvas.getContext("2d");
 
