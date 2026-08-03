@@ -108,7 +108,14 @@ export async function applyHearingLoss(audioBuffer){
         );
 
 
-        merger.connect(
+        const output =
+        offline.createGain();
+
+        output.gain.value = 3;
+
+        merger.connect(output);
+
+        output.connect(
             offline.destination
         );
 
@@ -156,11 +163,8 @@ function createEarFilter(context,loss){
         // temporary limit
         // so we can hear it working
 
-        filter.gain.value =
-            -Math.min(
-                loss[i],
-                35
-            );
+    filter.gain.value =
+        -loss[i] * 0.35;
 
 
         previous.connect(filter);
