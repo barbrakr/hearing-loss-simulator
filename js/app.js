@@ -54,19 +54,9 @@ const status =
 loadButton.onclick = async () => {
 
     try {
-        
-        status.innerHTML = "Loading audio...";
 
-                const canvas =
-        document.getElementById(
-        "spectrogram"
-        );
-        
-        
-        drawSpectrogram(
-            buffer,
-            canvas
-        );
+        status.innerHTML =
+        "Loading audio...";
 
 
         const source =
@@ -75,10 +65,11 @@ loadButton.onclick = async () => {
             ).value;
 
 
-        let buffer;
+        let loadedBuffer = null;
 
 
         if(source === "sample"){
+
 
             const filename =
                 document.getElementById(
@@ -87,12 +78,12 @@ loadButton.onclick = async () => {
 
 
             console.log(
-                "Loading sample:",
+                "Loading:",
                 filename
             );
 
 
-            buffer =
+            loadedBuffer =
                 await engine.loadFromURL(
                     filename
                 );
@@ -117,7 +108,7 @@ loadButton.onclick = async () => {
             }
 
 
-            buffer =
+            loadedBuffer =
                 await engine.loadFromFile(
                     file
                 );
@@ -126,26 +117,35 @@ loadButton.onclick = async () => {
 
 
         console.log(
-            "Loaded buffer:",
-            buffer
+            "Loaded:",
+            loadedBuffer
         );
-        originalBuffer = buffer;
 
 
-                drawSpectrogram(
-            buffer,
-            document.getElementById(
-                "originalSpectrogram"
-            )
-        );
+        originalBuffer =
+            loadedBuffer;
+
 
         status.innerHTML =
         `
         Audio loaded.<br>
-        Channels: ${buffer.numberOfChannels}<br>
-        Sample rate: ${buffer.sampleRate}<br>
-        Length: ${buffer.length}
+        Channels:
+        ${loadedBuffer.numberOfChannels}<br>
+
+        Sample rate:
+        ${loadedBuffer.sampleRate} Hz<br>
+
+        Samples:
+        ${loadedBuffer.length}
         `;
+
+
+        drawSpectrogram(
+            loadedBuffer,
+            document.getElementById(
+                "originalSpectrogram"
+            )
+        );
 
 
         playButton.disabled=false;
