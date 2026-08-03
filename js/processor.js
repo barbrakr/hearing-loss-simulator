@@ -124,11 +124,13 @@ function processChannel(
             );
 
 
+            const simulationStrength = 0.25;
+            
             const gain =
-            Math.pow(
-                10,
-                -db/40
-            );
+                Math.pow(
+                    10,
+                    -(db * simulationStrength) / 20
+                );
 
 
             re[i]*=gain;
