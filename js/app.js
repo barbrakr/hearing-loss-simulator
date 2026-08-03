@@ -20,7 +20,13 @@ const engine =
     new AudioEngine();
 
 
-createAudiogram();
+window.addEventListener(
+"DOMContentLoaded",
+()=>{
+
+    createAudiogram();
+
+});
 
 
 const loadButton =
