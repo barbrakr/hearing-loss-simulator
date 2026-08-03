@@ -27,6 +27,8 @@ await applyHearingLoss(
 engine.buffer =
 processedBuffer;
 
+await engine.context.resume();
+
 
 status.innerHTML =
 "Hearing loss applied";
