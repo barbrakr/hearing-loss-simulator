@@ -198,10 +198,12 @@ function processChannel(
 
             if(pos+i < output.length){
 
-                output[pos+i] +=
-                    re[i]
-                    *
-                    window[i];
+            output[pos+i] +=
+                re[i] *
+                window[i];
+            
+            windowSum[pos+i] +=
+                window[i] * window[i];
 
             }
 
