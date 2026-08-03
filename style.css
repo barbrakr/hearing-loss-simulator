@@ -39,3 +39,21 @@ background:#eeeeee;
     border:1px solid black;
 
 }
+
+.spectrogram-container {
+
+    display:flex;
+    gap:20px;
+
+}
+
+
+.spectrogram-container canvas {
+
+    border:1px solid black;
+
+    width:600px;
+
+    height:300px;
+
+}
