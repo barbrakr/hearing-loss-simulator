@@ -41,10 +41,15 @@ async loadFromFile(file){
 
 async loadFromURL(url){
 
+    console.log("Loading:", url);
+
     await this.init();
 
-    const response =
-        await fetch(url);
+    const response = await fetch(url);
+
+    if(!response.ok){
+        throw new Error("Couldn't load " + url);
+    }
 
     const arrayBuffer =
         await response.arrayBuffer();
@@ -53,8 +58,7 @@ async loadFromURL(url){
         await this.context.decodeAudioData(arrayBuffer);
 
     return this.buffer;
-
-}
+    }
 
 
 play(){
