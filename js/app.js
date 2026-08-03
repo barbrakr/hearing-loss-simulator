@@ -1,5 +1,6 @@
-import {AudioEngine}
-from "./audio.js";
+console.log("app.js loaded");
+
+import { AudioEngine } from "./audio.js";
 
 
 const engine =
@@ -27,14 +28,13 @@ document.getElementById(
 );
 
 
-loadButton.onclick =
-async ()=>{
+loadButton.onclick = async ()=>{
 
-const file =
-document.getElementById(
-"audioFile"
-).files[0];
+    console.log("Load button clicked");
 
+    const file =
+    document.getElementById("audioFile").files[0];
+}
 
 if(!file){
 
