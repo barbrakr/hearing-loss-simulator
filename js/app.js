@@ -1,4 +1,40 @@
 import {
+    applyHearingLoss
+} from "./processor.js";
+
+const processButton =
+document.getElementById(
+"processButton"
+);
+
+let processedBuffer = null;
+
+
+processButton.onclick = async ()=>{
+
+
+status.innerHTML =
+"Processing hearing loss...";
+
+
+processedBuffer =
+await applyHearingLoss(
+    engine.buffer,
+    engine.context
+);
+
+
+engine.buffer =
+processedBuffer;
+
+
+status.innerHTML =
+"Hearing loss applied";
+
+
+};
+
+import {
     createAudiogram,
     getLeftLoss,
     getRightLoss
