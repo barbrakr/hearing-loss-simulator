@@ -13,11 +13,11 @@ export const frequencies = [
 ];
 
 export let leftLoss = [
-    10,11,15,35,55,53,56,44,28,18,13
+    10,11,15,28,34,34,32,31,29,18,13
 ];
 
 export let rightLoss = [
-    10,11,15,35,55,53,56,44,28,18,13
+    9,10,13,22,34,30,30,30,25,12,16
 ];
 
 export function createAudiogram(){
