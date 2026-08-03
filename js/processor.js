@@ -159,31 +159,7 @@ function processChannel(
         }
 
     }
-
-
-       let peak = 0;
-    
-    for(let i=0;i<output.length;i++){
-        peak = Math.max(
-            peak,
-            Math.abs(output[i])
-        );
-    }
-    
-    
-    if(peak > 0){
-    
-        const compensation =
-            0.95 / peak;
-    
-        for(let i=0;i<output.length;i++){
-            output[i] *= compensation;
-        }
-    
-    } 
-
-
-    
+  
     return output;
 
 }
