@@ -63,7 +63,7 @@ loadButton.onclick = async () => {
         );
         
         
-        createSpectrogram(
+        drawSpectrogram(
             buffer,
             canvas
         );
