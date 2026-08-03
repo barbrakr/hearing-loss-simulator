@@ -236,7 +236,42 @@ function processChannel(
     }
 
 
-    return output;
+    return normalize(output);
+
+}
+
+
+function normalize(buffer){
+
+    let max = 0;
+
+    for(let i=0;i<buffer.length;i++){
+
+        max =
+        Math.max(
+            max,
+            Math.abs(buffer[i])
+        );
+
+    }
+
+
+    if(max > 0){
+
+        const gain =
+        0.95 / max;
+
+
+        for(let i=0;i<buffer.length;i++){
+
+            buffer[i] *= gain;
+
+        }
+
+    }
+
+
+    return buffer;
 
 }
 
