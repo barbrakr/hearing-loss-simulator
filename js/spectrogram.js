@@ -300,7 +300,13 @@ export function drawSpectrogram(
 
     }
 
-
+    ctx.fillStyle = "white";
+    ctx.fillRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
 
     ctx.putImageData(
         image,
@@ -316,8 +322,9 @@ export function drawSpectrogram(
     const barWidth = 20;
 
     const barX =
-        columns + 15;
-
+        leftMargin +
+        columns +
+        15;
 
 
     const gradient =
