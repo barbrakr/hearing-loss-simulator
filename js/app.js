@@ -12,32 +12,34 @@ let processedBuffer = null;
 
 processButton.onclick = async ()=>{
 
+    try {
 
-status.innerHTML =
-"Processing hearing loss...";
-
-
-processedBuffer =
-await applyHearingLoss(
-    engine.buffer,
-    engine.context
-);
+        status.innerHTML =
+        "Processing hearing loss...";
 
 
-engine.buffer =
-processedBuffer;
+        const result =
+        await applyHearingLoss(
+            engine.buffer
+        );
 
-await engine.context.resume();
 
-console.log(
-processedBuffer.numberOfChannels,
-processedBuffer.length
-);
-    
+        engine.buffer = result;
 
-status.innerHTML =
-"Hearing loss applied";
 
+        status.innerHTML =
+        "Hearing loss applied";
+
+
+    }
+    catch(e){
+
+        console.error(e);
+
+        status.innerHTML =
+        "Error: " + e.message;
+
+    }
 
 };
 
