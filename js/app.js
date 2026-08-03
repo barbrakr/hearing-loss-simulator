@@ -194,6 +194,31 @@ processButton.onclick = async ()=>{
             );
 
 
+        const original =
+            originalBuffer.getChannelData(0);
+        
+        const processed =
+            result.getChannelData(0);
+        
+        
+        let difference = 0;
+        
+        for(let i=0;i<original.length;i++){
+        
+            difference +=
+                Math.abs(
+                    original[i]-processed[i]
+                );
+        
+        }
+        
+        
+        console.log(
+            "Total difference:",
+            difference
+        );
+
+        
                 console.log(
             "Original sample:",
             originalBuffer.getChannelData(0)[10000]
