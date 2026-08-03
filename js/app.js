@@ -50,16 +50,6 @@ loadButton.onclick = async () => {
 
     try {
         
-        if(!engine.buffer){
-
-            status.innerHTML =
-            "No audio loaded.";
-
-            return;
-
-        }
-
-        
         status.innerHTML = "Loading audio...";
 
 
@@ -159,6 +149,17 @@ processButton.onclick = async ()=>{
 
     try {
 
+
+        if(!engine.buffer){
+
+            status.innerHTML =
+            "No audio loaded.";
+
+            return;
+
+        }
+
+
         status.innerHTML =
         "Processing hearing loss...";
 
@@ -168,6 +169,7 @@ processButton.onclick = async ()=>{
                 engine.buffer,
                 engine.context
             );
+
 
         engine.buffer =
             result;
