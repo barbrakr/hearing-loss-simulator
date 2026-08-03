@@ -1,5 +1,5 @@
 import {
-    createSpectrogram
+    drawSpectrogram
 } from "./spectrogram.js";
 
 import {
