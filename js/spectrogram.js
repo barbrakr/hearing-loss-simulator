@@ -85,6 +85,16 @@ export function drawSpectrogram(audioBuffer, canvas, name = "UNKNOWN") {
                     )
                 );
 
+                        if (x === 200 && (y === 46 || y === 186)) {
+                console.log(
+                    name,
+                    "bin",
+                    y,
+                    "dB:",
+                    db.toFixed(2)
+                );
+            }
+
             let value =
                 (db - minDb) /
                 (maxDb - minDb);
