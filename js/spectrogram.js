@@ -1,4 +1,11 @@
 import {
+    FFT_SIZE,
+    HOP_SIZE,
+    WINDOW
+} from "./stftConfig.js";
+
+
+import {
     fft,
     ifft
 } from "./dsp.js";
@@ -22,9 +29,8 @@ export function drawSpectrogram(
         audioBuffer.sampleRate;
 
 
-    const fftSize = 2048;
-
-    const hop = 512;
+    const fftSize = FFT_SIZE;
+    const hop = HOP_SIZE;
 
 
     const columns =
@@ -82,8 +88,10 @@ export function drawSpectrogram(
             i++
         ){
 
-            re[i] =
-                samples[offset+i] || 0;
+        re[i] =
+            (samples[offset+i] || 0)
+            *
+            WINDOW[i];
 
             im[i]=0;
 
@@ -120,20 +128,17 @@ export function drawSpectrogram(
             y<rows;
             y++
         ){
-
-            const magnitude =
-                Math.sqrt(
-                    re[y]*re[y]
-                    +
-                    im[y]*im[y]
-                );
-
-
-            const db =
-                20 *
-                Math.log10(
-                    magnitude + 0.000001
-                );
+        
+        const magnitude =
+            Math.sqrt(
+                re[y] * re[y] +
+                im[y] * im[y]
+            ) / (fftSize / 2);
+        
+        const db =
+            20 * Math.log10(
+                Math.max(magnitude, 1e-10)
+            );
 
 
             const minDb = -100;
@@ -141,17 +146,14 @@ export function drawSpectrogram(
             
             
             const value =
-                Math.max(
-                    0,
-                    Math.min(
-                        255,
-                        (
-                            (db-minDb)
-                            /
-                            (maxDb-minDb)
+                Math.round(
+                    255 *
+                    Math.max(
+                        0,
+                        Math.min(
+                            1,
+                            (db + 100) / 100
                         )
-                        *
-                        255
                     )
                 );
 
