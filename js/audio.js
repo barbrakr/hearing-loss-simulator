@@ -24,19 +24,35 @@ await this.context.resume();
 }
 
 
-async load(file){
+async loadFromFile(file){
 
-await this.init();
+    await this.init();
 
-const arrayBuffer =
-await file.arrayBuffer();
+    const arrayBuffer =
+        await file.arrayBuffer();
 
-this.buffer =
-await this.context.decodeAudioData(
-arrayBuffer
-);
+    this.buffer =
+        await this.context.decodeAudioData(arrayBuffer);
 
-return this.buffer;
+    return this.buffer;
+
+}
+
+
+async loadFromURL(url){
+
+    await this.init();
+
+    const response =
+        await fetch(url);
+
+    const arrayBuffer =
+        await response.arrayBuffer();
+
+    this.buffer =
+        await this.context.decodeAudioData(arrayBuffer);
+
+    return this.buffer;
 
 }
 
