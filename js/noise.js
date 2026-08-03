@@ -39,7 +39,7 @@ export function createNoiseBuffer(
             sample =
                 (Math.random()*2-1)
                 *
-                0.15;
+                0.8;
 
 
             // simple smoothing
@@ -64,7 +64,7 @@ export function createNoiseBuffer(
             sample =
                 (Math.random()*2-1)
                 *
-                0.08;
+                0.4;
 
 
             if(
