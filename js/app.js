@@ -194,6 +194,16 @@ processButton.onclick = async ()=>{
             );
 
 
+                console.log(
+            "Original sample:",
+            originalBuffer.getChannelData(0)[10000]
+        );
+        
+        console.log(
+            "Processed sample:",
+            result.getChannelData(0)[10000]
+        );     
+
         engine.buffer = result;
 
 
