@@ -1,3 +1,6 @@
+alert("JavaScript loaded");
+
+
 const frequencies = [
 125,
 250,
