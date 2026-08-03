@@ -5,182 +5,185 @@ import {
 } from "./audiogram.js";
 
 
-export async function applyHearingLoss(audioBuffer){
+export async function applyHearingLoss(audioBuffer, audioContext){
 
-
-    const channels =
-        audioBuffer.numberOfChannels;
-
+    const sampleRate = audioBuffer.sampleRate;
+    const length = audioBuffer.length;
 
     const offline =
         new OfflineAudioContext(
-            channels,
-            audioBuffer.length,
-            audioBuffer.sampleRate
+            2,
+            length,
+            sampleRate
         );
 
 
-    const source =
-        offline.createBufferSource();
-
-
-    source.buffer =
-        audioBuffer;
-
-
-    const merger =
-        offline.createChannelMerger(
-            channels
+    const outputBuffer =
+        offline.createBuffer(
+            2,
+            length,
+            sampleRate
         );
 
 
-    if(channels === 1){
-
-        const filter =
-            createEarFilter(
-                offline,
-                getLeftLoss()
-            );
+    const left =
+        audioBuffer.getChannelData(0);
 
 
-        source
-        .connect(filter.input);
+    const right =
+        audioBuffer.numberOfChannels > 1
+        ? audioBuffer.getChannelData(1)
+        : left;
 
 
-        filter.output
-        .connect(
-            offline.destination
+    const leftProcessed =
+        processChannel(
+            left,
+            sampleRate,
+            getLeftLoss()
         );
 
 
-    }
+    const rightProcessed =
+        processChannel(
+            right,
+            sampleRate,
+            getRightLoss()
+        );
 
 
-    else {
-
-
-        const splitter =
-            offline.createChannelSplitter(2);
-
-
-        source.connect(splitter);
-
-
-
-        const left =
-            createEarFilter(
-                offline,
-                getLeftLoss()
-            );
-
-
-        const right =
-            createEarFilter(
-                offline,
-                getRightLoss()
-            );
-
-
-
-        splitter.connect(
-            left.input,
+    outputBuffer
+        .copyToChannel(
+            leftProcessed,
             0
         );
 
 
-        splitter.connect(
-            right.input,
+    outputBuffer
+        .copyToChannel(
+            rightProcessed,
             1
         );
 
 
-        left.output.connect(
-            merger,
-            0,
-            0
-        );
-
-
-        right.output.connect(
-            merger,
-            0,
-            1
-        );
-
-
-        const output =
-        offline.createGain();
-
-        output.gain.value = 3;
-
-        merger.connect(output);
-
-        output.connect(
-            offline.destination
-        );
-
-    }
-
-
-    source.start();
-
-
-    return await offline.startRendering();
+    return outputBuffer;
 
 }
 
 
 
-
-function createEarFilter(context,loss){
-
-
-    let input =
-        context.createGain();
-
-
-    let previous=input;
+function processChannel(
+    audio,
+    sampleRate,
+    loss
+){
 
 
-    for(let i=0;i<frequencies.length;i++){
+    const n = audio.length;
 
 
-        let filter =
-            context.createBiquadFilter();
+    let real =
+        new Float32Array(n);
+
+    let imag =
+        new Float32Array(n);
 
 
-        filter.type="peaking";
+
+    // forward FFT
+
+    fft(
+        audio,
+        real,
+        imag
+    );
 
 
-        filter.frequency.value =
-            frequencies[i];
+
+    for(
+        let i=0;
+        i<n/2;
+        i++
+    ){
+
+        const hz =
+            i * sampleRate / n;
 
 
-        filter.Q.value =
-            0.7;
+        const attenuation =
+            interpolateLoss(
+                hz,
+                loss
+            );
 
 
-        // temporary limit
-        // so we can hear it working
-
-    filter.gain.value =
-        -loss[i] * 0.35;
-
-
-        previous.connect(filter);
+        const gain =
+            Math.pow(
+                10,
+                -attenuation / 20
+            );
 
 
-        previous=filter;
+        real[i] *= gain;
+        imag[i] *= gain;
+
+        real[n-i-1] *= gain;
+        imag[n-i-1] *= gain;
 
     }
 
 
-    return {
 
-        input:input,
+    const output =
+        new Float32Array(n);
 
-        output:previous
 
-    };
+    ifft(
+        real,
+        imag,
+        output
+    );
+
+
+    return output;
+
+}
+
+
+
+function interpolateLoss(freq,loss){
+
+    if(freq < frequencies[0])
+        return loss[0];
+
+
+    for(
+        let i=0;
+        i<frequencies.length-1;
+        i++
+    ){
+
+        if(
+            freq >= frequencies[i] &&
+            freq <= frequencies[i+1]
+        ){
+
+            const t =
+            (freq-frequencies[i]) /
+            (frequencies[i+1]-frequencies[i]);
+
+
+            return (
+                loss[i] +
+                t *
+                (loss[i+1]-loss[i])
+            );
+
+        }
+
+    }
+
+
+    return loss[loss.length-1];
 
 }
