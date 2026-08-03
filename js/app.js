@@ -29,6 +29,11 @@ processedBuffer;
 
 await engine.context.resume();
 
+console.log(
+processedBuffer.numberOfChannels,
+processedBuffer.length
+);
+    
 
 status.innerHTML =
 "Hearing loss applied";
