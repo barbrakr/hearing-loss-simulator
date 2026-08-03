@@ -12,11 +12,11 @@ export const frequencies = [
     10000
 ];
 
-export let rightLoss = [
+export let leftLoss = [
     10,11,15,28,34,34,32,31,29,18,13
 ];
 
-export let leftLoss = [
+export let rightLoss = [
     9,10,13,22,34,30,30,30,25,12,16
 ];
 
