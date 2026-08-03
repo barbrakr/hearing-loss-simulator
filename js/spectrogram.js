@@ -168,12 +168,14 @@ export function drawSpectrogram(
         0
     );
 
-
+    
     console.log(
         "Spectrogram:",
+        name,
         columns,
-        "x",
-        rows
+        rows,
+        "Hz max:",
+        sampleRate/2
     );
 
 }
