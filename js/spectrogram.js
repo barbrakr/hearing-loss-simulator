@@ -3,10 +3,6 @@ import {
     ifft
 } from "./dsp.js";
 
-const fftSize = 2048;
-const hop = fftSize / 2;
-
-const window = new Float32Array(fftSize);
 
 for(let i=0;i<fftSize;i++){
 
@@ -25,6 +21,32 @@ export function drawSpectrogram(
     name="UNKNOWN"
 ){
 
+    const fftSize = 2048;
+
+    const hop = fftSize / 2;
+    
+    const window = new Float32Array(fftSize);
+    
+    for(let i = 0; i < fftSize; i++){
+    
+        window[i] =
+            0.5 -
+            0.5 *
+            Math.cos(
+                2 * Math.PI * i / (fftSize - 1)
+            );
+    
+    }
+    
+    const columns =
+        Math.floor(
+            (samples.length - fftSize) / hop
+        );
+    
+    const rows = fftSize / 2;
+
+
+    
     console.log("Hop:", hop);
     console.log("Window[100]:", WINDOW[100]);
     
