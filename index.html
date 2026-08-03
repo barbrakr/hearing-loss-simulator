@@ -25,15 +25,58 @@ href="style.css">
 Hearing Loss Simulator
 </h1>
 
+<h2>Audio Source</h2>
+
+<label>
+<input
+type="radio"
+name="source"
+value="sample"
+checked>
+
+Built-in sample
+</label>
+
+<select id="sampleSelect">
+
+<option value="audio/male.wav">
+Male Speech
+</option>
+
+<option value="audio/female.wav">
+Female Speech
+</option>
+
+<option value="audio/restaurant.wav">
+Restaurant
+</option>
+
+<option value="audio/music.wav">
+Music
+</option>
+
+</select>
+
+<br><br>
+
+<label>
+<input
+type="radio"
+name="source"
+value="upload">
+
+Upload WAV
+</label>
+
 <input
 type="file"
 id="audioFile"
 accept=".wav">
 
+<br><br>
+
 <button id="loadButton">
-
 Load Audio
-
 </button>
 
 <hr>
