@@ -1,6 +1,40 @@
 import { fft } from "./dsp.js";
 
 
+function magma(t) {
+
+    t = Math.max(0, Math.min(1, t));
+
+    const stops = [
+        [0.00, 0,   0,   4],
+        [0.20, 40, 12, 84],
+        [0.40, 101, 21,110],
+        [0.60, 187, 55, 84],
+        [0.80, 249,142,  8],
+        [1.00, 252,253,191]
+    ];
+
+    for(let i = 0; i < stops.length - 1; i++){
+
+        const a = stops[i];
+        const b = stops[i + 1];
+
+        if(t <= b[0]){
+
+            const p = (t - a[0]) / (b[0] - a[0]);
+
+            return [
+                Math.round(a[1] + p * (b[1] - a[1])),
+                Math.round(a[2] + p * (b[2] - a[2])),
+                Math.round(a[3] + p * (b[3] - a[3]))
+            ];
+        }
+    }
+
+    return [252,253,191];
+}
+
+
 export function drawSpectrogram(
     audioBuffer,
     canvas,
@@ -218,74 +252,7 @@ export function drawSpectrogram(
             // Same colour map as color bar
             // -----------------------------
 
-            const t = value;
-
-
-            let r;
-            let g;
-            let b;
-
-
-
-            if(t < 0.25){
-
-                const p =
-                    t / 0.25;
-
-                r = 0;
-                g = 0;
-                b = Math.round(
-                    255 * p
-                );
-
-            }
-
-            else if(t < 0.50){
-
-                const p =
-                    (t - 0.25) / 0.25;
-
-                r = 0;
-                g = Math.round(
-                    255 * p
-                );
-                b = 255;
-
-            }
-
-            else if(t < 0.75){
-
-                const p =
-                    (t - 0.50) / 0.25;
-
-                r = Math.round(
-                    255 * p
-                );
-
-                g = 255;
-
-                b = Math.round(
-                    255 * (1-p)
-                );
-
-            }
-
-            else {
-
-                const p =
-                    (t - 0.75) / 0.25;
-
-                r = 255;
-
-                g = Math.round(
-                    255 * (1-p)
-                );
-
-                b = 0;
-
-            }
-
-
+            const [r, g, b] = magma(value);
 
             const pixel =
                 (
