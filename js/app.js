@@ -353,6 +353,12 @@ processButton.onclick = async ()=>{
 };
 
 
+drawDifferenceSpectrogram(
+    originalBuffer,
+    result,
+    document.getElementById("differenceSpectrogram")
+);
+
 
 playButton.onclick = ()=>{
 
