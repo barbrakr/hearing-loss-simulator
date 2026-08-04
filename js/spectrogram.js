@@ -161,7 +161,11 @@ export function drawSpectrogram(
                 im[y] * im[y]
             ) /
             (fftSize / 2);
-        
+
+        if (x === 0 && y % 100 === 0) {
+            console.log(y, magnitude);
+        }
+            
         // Very weak signal -> leave pixel white
         if (magnitude < 1e-6) {
         
