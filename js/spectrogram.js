@@ -155,24 +155,32 @@ export function drawSpectrogram(
         ){
 
 
-            const magnitude =
-                Math.sqrt(
-                    re[y] * re[y] +
-                    im[y] * im[y]
-                )
-                /
-                (fftSize / 2);
-
-
-
-            const db =
-                20 *
-                Math.log10(
-                    Math.max(
-                        magnitude,
-                        1e-10
-                    )
-                );
+        const magnitude =
+            Math.sqrt(
+                re[y] * re[y] +
+                im[y] * im[y]
+            ) /
+            (fftSize / 2);
+        
+        // Very weak signal -> leave pixel white
+        if (magnitude < 1e-6) {
+        
+            const pixel =
+                (
+                    (rows - 1 - y) *
+                    columns +
+                    x
+                ) * 4;
+        
+            image.data[pixel]     = 255;
+            image.data[pixel + 1] = 255;
+            image.data[pixel + 2] = 255;
+            image.data[pixel + 3] = 255;
+        
+            continue;
+        }
+        
+        const db = 20 * Math.log10(magnitude);
 
 
 
