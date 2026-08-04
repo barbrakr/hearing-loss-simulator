@@ -70,18 +70,20 @@ noiseButton.onclick = ()=>{
         );
 
 
-    engine.buffer =
-        mixBuffers(
-            engine.buffer,
-            noise,
-            0.15
-        );
+        workingBuffer =
+            mixBuffers(
+                workingBuffer,
+                noise,
+                0.15
+            );
+        
+        engine.buffer = workingBuffer;
 
         drawSpectrogram(
-        engine.buffer,
-        originalCanvas,
-        "NOISY"
-    );
+            workingBuffer,
+            originalCanvas,
+            "CURRENT"
+        );
 
 
     status.innerHTML =
@@ -277,9 +279,9 @@ processButton.onclick = async ()=>{
             engine.buffer.getChannelData(0)[10000]
         );
 
-        const result =
+        processedBuffer =
             applyHearingLoss(
-                engine.buffer,
+                workingBuffer,
                 engine.context
             );
 
@@ -322,7 +324,7 @@ processButton.onclick = async ()=>{
         engine.buffer = result;
         
         drawSpectrogram(
-            engine.buffer,
+            processedBuffer,
             lossCanvas,
             "LOSS"
         );
