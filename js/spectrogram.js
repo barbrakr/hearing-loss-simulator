@@ -309,10 +309,6 @@ export function drawSpectrogram(
         leftMargin +
         columns +
         20;
-
-
-    const barWidth = 20;
-    const barX = leftMargin + columns + 20;
     
     // Draw the colour bar using the same magma() function
     for (let y = 0; y < rows; y++) {
