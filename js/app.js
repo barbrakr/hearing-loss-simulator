@@ -8,7 +8,8 @@ import {
 
 
 import {
-    drawSpectrogram
+    drawSpectrogram,
+    drawDifferenceSpectrogram
 } from "./spectrogram.js";
 
 import {
