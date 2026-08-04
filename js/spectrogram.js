@@ -324,7 +324,7 @@ export function drawSpectrogram(
     const barX =
         leftMargin +
         columns +
-        80;
+        20;
 
 
     const gradient =
