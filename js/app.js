@@ -290,7 +290,7 @@ processButton.onclick = async ()=>{
             originalBuffer.getChannelData(0);
         
         const processed =
-            result.getChannelData(0);
+            processedBuffer.getChannelData(0);
         
         
         let difference = 0;
