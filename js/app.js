@@ -333,6 +333,12 @@ processButton.onclick = async ()=>{
         status.innerHTML =
         "Hearing loss applied";
 
+
+                drawDifferenceSpectrogram(
+            originalBuffer,
+            engine.buffer,
+            document.getElementById("differenceSpectrogram")
+        );
         
         console.log(
             "After loss:",
@@ -353,11 +359,7 @@ processButton.onclick = async ()=>{
 };
 
 
-drawDifferenceSpectrogram(
-    originalBuffer,
-    engine.buffer,
-    document.getElementById("differenceSpectrogram")
-);
+
 
 
 playButton.onclick = ()=>{
