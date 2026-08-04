@@ -311,40 +311,19 @@ export function drawSpectrogram(
         20;
 
 
-    const gradient =
-        ctx.createLinearGradient(
-            0,
-            rows,
-            0,
-            0
-        );
-
-
-    gradient.addColorStop(
-        0.0,
-        "black"
-    );
-
-    gradient.addColorStop(
-        0.25,
-        "blue"
-    );
-
-    gradient.addColorStop(
-        0.50,
-        "cyan"
-    );
-
-    gradient.addColorStop(
-        0.75,
-        "yellow"
-    );
-
-    gradient.addColorStop(
-        1.0,
-        "red"
-    );
-
+    const barWidth = 20;
+    const barX = leftMargin + columns + 20;
+    
+    // Draw the colour bar using the same magma() function
+    for (let y = 0; y < rows; y++) {
+    
+        const t = 1 - y / (rows - 1);
+    
+        const [r, g, b] = magma(t);
+    
+        ctx.fillStyle = `rgb(${r},${g},${b})`;
+        ctx.fillRect(barX, y, barWidth, 1);
+    }
 
     ctx.fillStyle =
         gradient;
