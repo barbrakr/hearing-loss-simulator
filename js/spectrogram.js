@@ -16,7 +16,7 @@ export function drawSpectrogram(
     const sampleRate =
         audioBuffer.sampleRate;
 
-
+    
     // -----------------------------
     // STFT settings
     // -----------------------------
