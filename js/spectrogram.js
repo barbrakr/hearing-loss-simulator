@@ -281,8 +281,8 @@ export function drawSpectrogram(
 
 
         }
-    console.log("Actual dB range:", minSeen, maxSeen);
     }
+    console.log("Actual dB range:", minSeen, maxSeen);
 
     ctx.fillStyle = "white";
     ctx.fillRect(
@@ -320,17 +320,6 @@ export function drawSpectrogram(
         ctx.fillStyle = `rgb(${r},${g},${b})`;
         ctx.fillRect(barX, y, barWidth, 1);
     }
-
-    ctx.fillStyle =
-        gradient;
-
-
-    ctx.fillRect(
-        barX,
-        0,
-        barWidth,
-        rows
-    );
 
 
 
