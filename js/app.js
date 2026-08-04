@@ -32,7 +32,9 @@ console.log("app.js loaded");
 const engine =
     new AudioEngine();
 
-let originalBuffer = null;
+let originalBuffer = null;   // clean audio
+let workingBuffer = null;    // clean + optional noise
+let processedBuffer = null;  // hearing-loss result
 
 let originalCanvas = null;
 let lossCanvas = null;
@@ -205,8 +207,10 @@ loadButton.onclick = async () => {
         );
 
 
-        originalBuffer =
-            loadedBuffer;
+        originalBuffer = loadedBuffer;
+        workingBuffer = loadedBuffer;
+        processedBuffer = null;
+        engine.buffer = workingBuffer;
 
 
         status.innerHTML =
