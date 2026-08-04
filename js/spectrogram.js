@@ -317,9 +317,6 @@ export function drawSpectrogram(
     console.log("Actual dB range:", minSeen, maxSeen);
     }
 
-    const minDb = minSeen;
-    const maxDb = maxSeen;
-
     ctx.fillStyle = "white";
     ctx.fillRect(
         0,
