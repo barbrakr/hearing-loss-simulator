@@ -355,7 +355,7 @@ processButton.onclick = async ()=>{
 
 drawDifferenceSpectrogram(
     originalBuffer,
-    result,
+    engine.buffer,
     document.getElementById("differenceSpectrogram")
 );
 
