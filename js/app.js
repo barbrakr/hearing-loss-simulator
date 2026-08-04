@@ -318,10 +318,10 @@ processButton.onclick = async ()=>{
         
         console.log(
             "Processed sample:",
-            result.getChannelData(0)[10000]
+            processedBuffer.getChannelData(0)[10000]
         );     
 
-        engine.buffer = result;
+        engine.buffer = processedBuffer;
         
         drawSpectrogram(
             processedBuffer,
@@ -336,7 +336,7 @@ processButton.onclick = async ()=>{
         
         console.log(
             "After loss:",
-            result.getChannelData(0)[10000]
+            processedBuffer.getChannelData(0)[10000]
         );
 
 
