@@ -512,3 +512,231 @@ export function drawSpectrogram(
     );
 
 }
+
+
+
+import { fft } from "./dsp.js";
+
+export function drawDifferenceSpectrogram(
+    originalBuffer,
+    processedBuffer,
+    canvas
+){
+
+    const ctx = canvas.getContext("2d");
+
+    const original =
+        originalBuffer.getChannelData(0);
+
+    const processed =
+        processedBuffer.getChannelData(0);
+
+    const sampleRate =
+        originalBuffer.sampleRate;
+
+    const fftSize = 2048;
+    const hop = fftSize / 2;
+
+    const maxFrequency = 10000;
+
+    const rows =
+        Math.floor(
+            maxFrequency *
+            fftSize /
+            sampleRate
+        );
+
+    const columns =
+        Math.floor(
+            (original.length - fftSize) /
+            hop
+        );
+
+    canvas.width = columns;
+    canvas.height = rows;
+
+    const image =
+        ctx.createImageData(
+            columns,
+            rows
+        );
+
+    //-----------------------------------
+    // Hann window
+    //-----------------------------------
+
+    const window =
+        new Float32Array(
+            fftSize
+        );
+
+    for(let i=0;i<fftSize;i++){
+
+        window[i] =
+            0.5 -
+            0.5 *
+            Math.cos(
+                2*Math.PI*i/(fftSize-1)
+            );
+
+    }
+
+    //-----------------------------------
+
+    const re1 =
+        new Float32Array(fftSize);
+
+    const im1 =
+        new Float32Array(fftSize);
+
+    const re2 =
+        new Float32Array(fftSize);
+
+    const im2 =
+        new Float32Array(fftSize);
+
+    const minDb = -100;
+    const maxDb = 0;
+
+    for(let x=0;x<columns;x++){
+
+        const offset =
+            x * hop;
+
+        for(let i=0;i<fftSize;i++){
+
+            re1[i] =
+                (original[offset+i] || 0)
+                * window[i];
+
+            re2[i] =
+                (processed[offset+i] || 0)
+                * window[i];
+
+            im1[i]=0;
+            im2[i]=0;
+
+        }
+
+        fft(re1,im1);
+        fft(re2,im2);
+
+        for(let y=0;y<rows;y++){
+
+            const magOriginal =
+                Math.sqrt(
+                    re1[y]*re1[y] +
+                    im1[y]*im1[y]
+                ) /
+                (fftSize/2);
+
+            const magProcessed =
+                Math.sqrt(
+                    re2[y]*re2[y] +
+                    im2[y]*im2[y]
+                ) /
+                (fftSize/2);
+
+            //--------------------------------
+            // Lost energy
+            //--------------------------------
+
+            const lost =
+                Math.max(
+                    0,
+                    magOriginal -
+                    magProcessed
+                );
+
+            const db =
+                20 *
+                Math.log10(
+                    Math.max(
+                        lost,
+                        1e-10
+                    )
+                );
+
+            let t =
+                (db-minDb)/
+                (maxDb-minDb);
+
+            t =
+                Math.max(
+                    0,
+                    Math.min(
+                        1,
+                        t
+                    )
+                );
+
+            //--------------------------------
+            // Black -> Red -> Yellow -> White
+            //--------------------------------
+
+            let r,g,b;
+
+            if(t < 0.5){
+
+                const p = t/0.5;
+
+                r =
+                    Math.round(
+                        255*p
+                    );
+
+                g = 0;
+                b = 0;
+
+            }
+
+            else{
+
+                const p =
+                    (t-0.5)/0.5;
+
+                r = 255;
+
+                g =
+                    Math.round(
+                        255*p
+                    );
+
+                b =
+                    Math.round(
+                        255*p
+                    );
+
+            }
+
+            const pixel =
+                (
+                    (rows-1-y)
+                    *
+                    columns
+                    +
+                    x
+                )
+                *
+                4;
+
+            image.data[pixel] = r;
+            image.data[pixel+1] = g;
+            image.data[pixel+2] = b;
+            image.data[pixel+3] = 255;
+
+        }
+
+    }
+
+    ctx.putImageData(
+        image,
+        0,
+        0
+    );
+
+    console.log(
+        "Difference spectrogram drawn."
+    );
+
+}
