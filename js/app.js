@@ -6,7 +6,6 @@ import {
     mixBuffers
 } from "./mixer.js";
 
-
 import {
     drawSpectrogram,
     drawDifferenceSpectrogram
