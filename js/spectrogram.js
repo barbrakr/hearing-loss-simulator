@@ -116,6 +116,9 @@ export function drawSpectrogram(
     // Calculate spectrogram
     // -----------------------------
 
+    let minSeen = Infinity;
+    let maxSeen = -Infinity;
+    
     for(
         let x = 0;
         x < columns;
@@ -186,6 +189,8 @@ export function drawSpectrogram(
         
         const db = 20 * Math.log10(magnitude);
 
+        minSeen = Math.min(minSeen, db);
+        maxSeen = Math.max(maxSeen, db);
 
 
             let value =
@@ -309,7 +314,7 @@ export function drawSpectrogram(
 
 
         }
-
+    console.log("Actual dB range:", minSeen, maxSeen);
     }
 
     ctx.fillStyle = "white";
