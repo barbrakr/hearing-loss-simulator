@@ -74,29 +74,6 @@ export async function createNoiseBuffer(
         }
 
 
-        if(type === "traffic"){
-
-            // distant traffic:
-            // low rumble + irregular events
-
-            sample =
-                (Math.random()*2-1)
-                *
-                0.4;
-
-
-            if(
-                Math.random() < 0.0005
-            ){
-
-                sample +=
-                    Math.random()
-                    *
-                    0.5;
-
-            }
-
-        }
 
 
 
