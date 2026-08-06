@@ -1,10 +1,28 @@
-export function createNoiseBuffer(
+export async function createNoiseBuffer(
     context,
     type = "fan",
     duration,
     sampleRate
 ){
-
+    
+    if(type === "traffic"){
+    
+        const response =
+            await fetch("audio/traffic.wav");
+    
+        const arrayBuffer =
+            await response.arrayBuffer();
+    
+        const traffic =
+            await context.decodeAudioData(arrayBuffer);
+    
+        return matchLength(
+            traffic,
+            duration,
+            context
+        );
+    }
+    
     const length =
         Math.floor(
             duration * sampleRate
@@ -93,4 +111,56 @@ export function createNoiseBuffer(
 
     return buffer;
 
+}
+
+
+function matchLength(
+    sourceBuffer,
+    duration,
+    context
+){
+
+    const targetLength =
+        Math.floor(
+            duration *
+            sourceBuffer.sampleRate
+        );
+
+    const output =
+        context.createBuffer(
+            sourceBuffer.numberOfChannels,
+            targetLength,
+            sourceBuffer.sampleRate
+        );
+
+    for(let ch = 0;
+        ch < sourceBuffer.numberOfChannels;
+        ch++){
+
+        const src =
+            sourceBuffer.getChannelData(ch);
+
+        const dst =
+            output.getChannelData(ch);
+
+        let pos = 0;
+
+        while(pos < targetLength){
+
+            const n =
+                Math.min(
+                    src.length,
+                    targetLength - pos
+                );
+
+            dst.set(
+                src.subarray(0, n),
+                pos
+            );
+
+            pos += n;
+        }
+    }
+
+    return output;
 }
