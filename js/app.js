@@ -62,7 +62,7 @@ noiseButton.onclick = ()=>{
 
 
     const noise =
-        createNoiseBuffer(
+        await createNoiseBuffer(
             engine.context,
             type,
             engine.buffer.duration,
