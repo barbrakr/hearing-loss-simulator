@@ -60,7 +60,10 @@ noiseButton.onclick = async () =>{
             "noiseSelect"
         ).value;
 
+    console.log(noise);
+    console.log(noise instanceof AudioBuffer);
 
+    
     const noise =
         await createNoiseBuffer(
             engine.context,
