@@ -16,15 +16,12 @@ export async function createNoiseBuffer(
         const traffic =
             await context.decodeAudioData(arrayBuffer);
 
-        const traffic =
-    await context.decodeAudioData(arrayBuffer);
-
-    console.log(
-        "Traffic:",
-        traffic.duration,
-        traffic.length,
-        traffic.sampleRate
-    );
+        console.log(
+            "Traffic:",
+            traffic.duration,
+            traffic.length,
+            traffic.sampleRate
+        );
             
         return matchLength(
             traffic,
