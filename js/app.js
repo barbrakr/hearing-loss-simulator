@@ -60,8 +60,7 @@ noiseButton.onclick = async () =>{
             "noiseSelect"
         ).value;
 
-    console.log(noise);
-    console.log(noise instanceof AudioBuffer);
+
 
     
     const noise =
@@ -71,7 +70,9 @@ noiseButton.onclick = async () =>{
             engine.buffer.duration,
             engine.buffer.sampleRate
         );
-
+    
+    console.log(noise);
+    console.log(noise instanceof AudioBuffer);
 
         workingBuffer =
             mixBuffers(
