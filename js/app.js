@@ -45,7 +45,7 @@ const noiseButton =
     );
 
 
-noiseButton.onclick = ()=>{
+noiseButton.onclick = async () =>{
     if(!engine.buffer){
     
         status.innerHTML =
