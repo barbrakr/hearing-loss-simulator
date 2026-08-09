@@ -10,15 +10,17 @@ import {
 } from "./dsp.js";
 
 
-export function applyHearingLoss(buffer, context){
+export function applyHearingLoss(
+    buffer,
+    context
+){
 
-
-const result =
-    context.createBuffer(
-        2,
-        buffer.length,
-        buffer.sampleRate
-    );
+    const result =
+        context.createBuffer(
+            2,
+            buffer.length,
+            buffer.sampleRate
+        );
 
 
     const left =
@@ -27,9 +29,8 @@ const result =
 
     const right =
         buffer.numberOfChannels > 1
-        ? buffer.getChannelData(1)
-        : left;
-
+            ? buffer.getChannelData(1)
+            : left;
 
 
     result.copyToChannel(
@@ -53,7 +54,6 @@ const result =
 
 
     return result;
-
 }
 
 
@@ -65,7 +65,6 @@ function processChannel(
 ){
 
     const size = 2048;
-
     const hop = size / 2;
 
 
@@ -73,7 +72,8 @@ function processChannel(
         new Float32Array(
             input.length
         );
-    
+
+
     const windowSum =
         new Float32Array(
             input.length
@@ -84,17 +84,20 @@ function processChannel(
         new Float32Array(size);
 
 
-    for(let i=0;i<size;i++){
+    /*
+        Hann window
+    */
+
+    for(let i = 0; i < size; i++){
 
         window[i] =
             0.5 -
             0.5 *
             Math.cos(
-                2*Math.PI*i/(size-1)
+                2 * Math.PI * i / (size - 1)
             );
 
     }
-
 
 
     const re =
@@ -104,39 +107,54 @@ function processChannel(
         new Float32Array(size);
 
 
+    /*
+        FULL AUDIOGRAM
+
+        1.0 = full hearing-loss audiogram
+
+        This remains 1.0 by default.
+    */
+
+    const simulationStrength = 1.0;
+
+
+    /*
+        STFT processing
+    */
 
     for(
-        let pos=0;
-        pos<input.length;
-        pos+=hop
+        let pos = 0;
+        pos < input.length;
+        pos += hop
     ){
 
+        /*
+            Copy windowed signal
+        */
 
-        for(let i=0;i<size;i++){
+        for(let i = 0; i < size; i++){
 
             re[i] =
-                (input[pos+i] || 0)
+                (input[pos + i] || 0)
                 *
                 window[i];
 
-            im[i]=0;
+            im[i] = 0;
 
         }
 
 
-
-        fft(re,im);
-
+        fft(re, im);
 
 
         /*
-          Apply audiogram only
-          to positive frequencies
+            Apply audiogram attenuation
+            to positive frequencies.
         */
 
         for(
-            let i=0;
-            i<size/2;
+            let i = 0;
+            i < size / 2;
             i++
         ){
 
@@ -154,20 +172,20 @@ function processChannel(
 
 
             /*
-              Simulation calibration
+                Convert hearing loss in dB
+                into linear attenuation.
 
-              0.25 = mild
-              0.5  = moderate
-              1.0  = full audiogram
+                Example:
+
+                10 dB  -> 0.316
+                20 dB  -> 0.100
+                30 dB  -> 0.032
             */
-
-            const simulationStrength = 1.0;
-
 
             const gain =
                 Math.pow(
                     10,
-                    -(db * simulationStrength)/20
+                    -(db * simulationStrength) / 20
                 );
 
 
@@ -175,31 +193,48 @@ function processChannel(
             im[i] *= gain;
 
 
-            // mirror frequency
-            const mirror =
-                size-i;
+            /*
+                Mirror the positive-frequency
+                bin onto the negative-frequency
+                bin.
+            */
 
-            re[mirror] *= gain;
-            im[mirror] *= gain;
+            if(i > 0){
+
+                const mirror =
+                    size - i;
+
+                re[mirror] *= gain;
+                im[mirror] *= gain;
+
+            }
 
         }
 
 
+        /*
+            Back to time domain
+        */
 
-        ifft(re,im);
+        ifft(re, im);
 
 
+        /*
+            Overlap-add
+        */
 
-        for(let i=0;i<size;i++){
+        for(let i = 0; i < size; i++){
 
-            if(pos+i < output.length){
+            if(pos + i < output.length){
 
-            output[pos+i] +=
-                re[i] *
-                window[i];
-            
-            windowSum[pos+i] +=
-                window[i] * window[i];
+                output[pos + i] +=
+                    re[i] *
+                    window[i];
+
+
+                windowSum[pos + i] +=
+                    window[i] *
+                    window[i];
 
             }
 
@@ -209,33 +244,169 @@ function processChannel(
 
 
     /*
-       Only prevent clipping.
-       Do NOT normalize.
+        Correct overlap-add windowing.
     */
 
-    for(let i=0;i<output.length;i++){
-    
+    for(let i = 0; i < output.length; i++){
+
         if(windowSum[i] > 0){
-    
-            output[i] /= windowSum[i];
-    
+
+            output[i] /=
+                windowSum[i];
+
         }
-    
+
     }
-    
-    
-    for(let i=0;i<output.length;i++){
-    
-        if(output[i] > 1)
-            output[i]=1;
-    
-        if(output[i] < -1)
-            output[i]=-1;
-    
+
+
+    /*
+    =====================================================
+        MAKE-UP GAIN
+    =====================================================
+
+        The audiogram attenuation is deliberately real.
+
+        However, applying 20–35 dB of attenuation to
+        portions of the spectrum can make the entire
+        signal subjectively much quieter.
+
+        We therefore restore some overall loudness.
+
+        This does NOT undo the frequency-selective loss.
+
+        It simply raises the remaining signal.
+    */
+
+
+    let inputEnergy = 0;
+    let outputEnergy = 0;
+
+
+    for(let i = 0; i < input.length; i++){
+
+        inputEnergy +=
+            input[i] * input[i];
+
+
+        outputEnergy +=
+            output[i] * output[i];
+
     }
+
+
+    const inputRms =
+        Math.sqrt(
+            inputEnergy /
+            input.length
+        );
+
+
+    const outputRms =
+        Math.sqrt(
+            outputEnergy /
+            output.length
+        );
+
+
+    let makeupGain = 1;
+
+
+    if(
+        outputRms > 0 &&
+        inputRms > 0
+    ){
+
+        makeupGain =
+            inputRms /
+            outputRms;
+
+    }
+
+
+    /*
+        Don't compensate indefinitely.
+
+        A maximum of +12 dB keeps the result
+        from becoming unnaturally loud when the
+        hearing loss is severe.
+    */
+
+    const maximumMakeupGain =
+        Math.pow(
+            10,
+            12 / 20
+        );
+
+
+    makeupGain =
+        Math.min(
+            makeupGain,
+            maximumMakeupGain
+        );
+
+
+    console.log(
+        "Input RMS:",
+        inputRms
+    );
+
+    console.log(
+        "Processed RMS:",
+        outputRms
+    );
+
+    console.log(
+        "Make-up gain:",
+        makeupGain.toFixed(3),
+        "(" +
+        (
+            20 *
+            Math.log10(makeupGain)
+        ).toFixed(1) +
+        " dB)"
+    );
+
+
+    /*
+        Apply make-up gain.
+    */
+
+    for(let i = 0; i < output.length; i++){
+
+        output[i] *= makeupGain;
+
+    }
+
+
+    /*
+    =====================================================
+        SOFT CLIPPING / PEAK PROTECTION
+    =====================================================
+
+        We don't normalize the entire signal.
+
+        We only protect against values exceeding
+        the Web Audio range of -1 to +1.
+    */
+
+    for(let i = 0; i < output.length; i++){
+
+        if(output[i] > 1){
+
+            output[i] = 1;
+
+        }
+
+        else if(output[i] < -1){
+
+            output[i] = -1;
+
+        }
+
+    }
+
 
     return output;
-
 }
 
 
@@ -245,20 +416,30 @@ function interpolateLoss(
     loss
 ){
 
+    /*
+        Below first audiogram frequency
+    */
 
-    if(freq <= frequencies[0])
+    if(freq <= frequencies[0]){
+
         return loss[0];
 
+    }
+
+
+    /*
+        Interpolate between audiogram points
+    */
 
     for(
-        let i=0;
-        i<frequencies.length-1;
+        let i = 0;
+        i < frequencies.length - 1;
         i++
     ){
 
         if(
             freq >= frequencies[i] &&
-            freq <= frequencies[i+1]
+            freq <= frequencies[i + 1]
         ){
 
             const t =
@@ -267,7 +448,7 @@ function interpolateLoss(
                 )
                 /
                 (
-                    frequencies[i+1]
+                    frequencies[i + 1]
                     -
                     frequencies[i]
                 );
@@ -278,7 +459,7 @@ function interpolateLoss(
                 +
                 t *
                 (
-                    loss[i+1]
+                    loss[i + 1]
                     -
                     loss[i]
                 )
@@ -289,6 +470,10 @@ function interpolateLoss(
     }
 
 
-    return loss[loss.length-1];
+    /*
+        Above the final audiogram frequency
+    */
+
+    return loss[loss.length - 1];
 
 }
