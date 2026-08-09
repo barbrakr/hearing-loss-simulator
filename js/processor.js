@@ -161,7 +161,7 @@ function processChannel(
               1.0  = full audiogram
             */
 
-            const simulationStrength = 0.35;
+            const simulationStrength = 1.0;
 
 
             const gain =
