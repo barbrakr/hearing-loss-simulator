@@ -1,39 +1,474 @@
 import { fft } from "./dsp.js";
 
 
-function magma(t) {
+/*
+==========================================================
+SPECTROGRAM CALIBRATION
+==========================================================
 
-    t = Math.max(0, Math.min(1, t));
+These values define the relationship between digital
+amplitude and acoustic dB SPL.
 
-    const stops = [
-        [0.00, 0,   0,   4],
-        [0.20, 40, 12, 84],
-        [0.40, 101, 21,110],
-        [0.60, 187, 55, 84],
-        [0.80, 249,142,  8],
-        [1.00, 252,253,191]
-    ];
+IMPORTANT:
+A WAV file does not inherently contain absolute SPL.
 
-    for(let i = 0; i < stops.length - 1; i++){
+These are calibration parameters and should eventually
+be replaced by values obtained from a calibrated reference
+recording/tone.
 
-        const a = stops[i];
-        const b = stops[i + 1];
+For now:
 
-        if(t <= b[0]){
+    amplitude 0.1 = 70 dB SPL
+*/
 
-            const p = (t - a[0]) / (b[0] - a[0]);
+const referenceAmplitude = 0.1;
+const referenceSPL = 70;
 
-            return [
-                Math.round(a[1] + p * (b[1] - a[1])),
-                Math.round(a[2] + p * (b[2] - a[2])),
-                Math.round(a[3] + p * (b[3] - a[3]))
-            ];
-        }
-    }
 
-    return [252,253,191];
+/*
+==========================================================
+DISPLAY RANGE
+==========================================================
+*/
+
+const minSPL = 20;
+const maxSPL = 100;
+
+const maxFrequency = 10000;
+
+
+/*
+==========================================================
+DIGITAL AMPLITUDE -> dB SPL
+==========================================================
+*/
+
+function amplitudeToSPL(amplitude) {
+
+    amplitude =
+        Math.max(
+            amplitude,
+            1e-10
+        );
+
+
+    const digitalDifference =
+        20 *
+        Math.log10(
+            amplitude /
+            referenceAmplitude
+        );
+
+
+    return (
+        referenceSPL +
+        digitalDifference
+    );
+
 }
 
+
+/*
+==========================================================
+SHARED COLOUR MAP
+==========================================================
+*/
+
+function getColour(value) {
+
+    const t =
+        Math.max(
+            0,
+            Math.min(
+                1,
+                value
+            )
+        );
+
+
+    let r;
+    let g;
+    let b;
+
+
+    /*
+    black -> blue
+    */
+
+    if(t < 0.25){
+
+        const p =
+            t / 0.25;
+
+        r = 0;
+        g = 0;
+        b =
+            Math.round(
+                255 * p
+            );
+
+    }
+
+
+    /*
+    blue -> cyan
+    */
+
+    else if(t < 0.50){
+
+        const p =
+            (t - 0.25) /
+            0.25;
+
+        r = 0;
+
+        g =
+            Math.round(
+                255 * p
+            );
+
+        b = 255;
+
+    }
+
+
+    /*
+    cyan -> yellow
+    */
+
+    else if(t < 0.75){
+
+        const p =
+            (t - 0.50) /
+            0.25;
+
+        r =
+            Math.round(
+                255 * p
+            );
+
+        g = 255;
+
+        b =
+            Math.round(
+                255 * (1 - p)
+            );
+
+    }
+
+
+    /*
+    yellow -> red
+    */
+
+    else {
+
+        const p =
+            (t - 0.75) /
+            0.25;
+
+        r = 255;
+
+        g =
+            Math.round(
+                255 * (1 - p)
+            );
+
+        b = 0;
+
+    }
+
+
+    return {
+        r,
+        g,
+        b
+    };
+
+}
+
+
+/*
+==========================================================
+DRAW COLOUR BAR
+==========================================================
+*/
+
+function drawColourBar(
+    ctx,
+    barX,
+    rows
+) {
+
+    const barWidth = 20;
+
+
+    const gradient =
+        ctx.createLinearGradient(
+            0,
+            rows,
+            0,
+            0
+        );
+
+
+    gradient.addColorStop(
+        0.0,
+        "black"
+    );
+
+    gradient.addColorStop(
+        0.25,
+        "blue"
+    );
+
+    gradient.addColorStop(
+        0.50,
+        "cyan"
+    );
+
+    gradient.addColorStop(
+        0.75,
+        "yellow"
+    );
+
+    gradient.addColorStop(
+        1.0,
+        "red"
+    );
+
+
+    ctx.fillStyle =
+        gradient;
+
+
+    ctx.fillRect(
+        barX,
+        0,
+        barWidth,
+        rows
+    );
+
+
+    /*
+    SPL labels
+    */
+
+    ctx.fillStyle =
+        "black";
+
+    ctx.font =
+        "12px Arial";
+
+    ctx.textAlign =
+        "left";
+
+
+    const splSteps = 8;
+
+
+    for(
+        let i = 0;
+        i <= splSteps;
+        i++
+    ){
+
+        const spl =
+            maxSPL -
+            (
+                i /
+                splSteps
+            )
+            *
+            (
+                maxSPL -
+                minSPL
+            );
+
+
+        const y =
+            (
+                i /
+                splSteps
+            )
+            *
+            rows;
+
+
+        ctx.fillText(
+            Math.round(spl) +
+            " dB SPL",
+            barX + 25,
+            y + 4
+        );
+
+    }
+
+}
+
+
+/*
+==========================================================
+DRAW AXES
+==========================================================
+*/
+
+function drawAxes(
+    ctx,
+    audioBuffer,
+    leftMargin,
+    columns,
+    rows
+) {
+
+    ctx.fillStyle =
+        "black";
+
+    ctx.font =
+        "12px Arial";
+
+    ctx.textAlign =
+        "left";
+
+
+    /*
+    ------------------------------------------------------
+    TIME AXIS
+    ------------------------------------------------------
+    */
+
+    const duration =
+        audioBuffer.duration;
+
+
+    const timeSteps = 10;
+
+
+    for(
+        let i = 0;
+        i <= timeSteps;
+        i++
+    ){
+
+        const x =
+            leftMargin +
+            (
+                i /
+                timeSteps
+            )
+            *
+            columns;
+
+
+        const time =
+            duration *
+            i /
+            timeSteps;
+
+
+        ctx.fillText(
+            time.toFixed(1) +
+            " s",
+            x - 10,
+            rows + 25
+        );
+
+    }
+
+
+    /*
+    ------------------------------------------------------
+    FREQUENCY AXIS
+    ------------------------------------------------------
+    */
+
+    for(
+        let frequency = 0;
+        frequency <= maxFrequency;
+        frequency += 2000
+    ){
+
+        const y =
+            rows -
+            (
+                frequency /
+                maxFrequency
+            )
+            *
+            rows;
+
+
+        ctx.fillText(
+            frequency +
+            " Hz",
+            5,
+            y + 4
+        );
+
+    }
+
+}
+
+
+/*
+==========================================================
+CALCULATE FFT MAGNITUDE
+==========================================================
+*/
+
+function calculateMagnitude(
+    samples,
+    offset,
+    fftSize,
+    window,
+    re,
+    im,
+    bin
+) {
+
+    for(
+        let i = 0;
+        i < fftSize;
+        i++
+    ){
+
+        re[i] =
+            (
+                samples[offset + i] ||
+                0
+            )
+            *
+            window[i];
+
+
+        im[i] = 0;
+
+    }
+
+
+    fft(
+        re,
+        im
+    );
+
+
+    return (
+        Math.sqrt(
+            re[bin] * re[bin] +
+            im[bin] * im[bin]
+        )
+        /
+        (fftSize / 2)
+    );
+
+}
+
+
+/*
+==========================================================
+DRAW NORMAL dB SPL SPECTROGRAM
+==========================================================
+*/
 
 export function drawSpectrogram(
     audioBuffer,
@@ -41,26 +476,33 @@ export function drawSpectrogram(
     name = "UNKNOWN"
 ) {
 
-    const ctx = canvas.getContext("2d");
+    if(!audioBuffer || !canvas){
+
+        console.error(
+            "drawSpectrogram: missing buffer or canvas"
+        );
+
+        return;
+
+    }
+
+
+    const ctx =
+        canvas.getContext("2d");
 
 
     const samples =
         audioBuffer.getChannelData(0);
 
+
     const sampleRate =
         audioBuffer.sampleRate;
 
-    
-    // -----------------------------
-    // STFT settings
-    // -----------------------------
 
     const fftSize = 2048;
 
-    const hop = fftSize / 2;
-
-
-    const maxFrequency = 10000;
+    const hop =
+        fftSize / 2;
 
 
     const rows =
@@ -73,27 +515,36 @@ export function drawSpectrogram(
 
     const columns =
         Math.floor(
-            (samples.length - fftSize)
+            (
+                samples.length -
+                fftSize
+            )
             /
             hop
         );
 
 
-    const colorBarWidth = 100;
-
     const leftMargin = 60;
+
     const bottomMargin = 40;
-    
+
+    const colorBarWidth = 120;
+
+
     canvas.width =
         leftMargin +
         columns +
         colorBarWidth;
-    
+
+
     canvas.height =
         rows +
         bottomMargin;
 
 
+    /*
+    Image
+    */
 
     const image =
         ctx.createImageData(
@@ -102,10 +553,9 @@ export function drawSpectrogram(
         );
 
 
-
-    // -----------------------------
-    // Hann window
-    // -----------------------------
+    /*
+    Hann window
+    */
 
     const window =
         new Float32Array(
@@ -113,18 +563,23 @@ export function drawSpectrogram(
         );
 
 
-    for(let i = 0; i < fftSize; i++){
+    for(
+        let i = 0;
+        i < fftSize;
+        i++
+    ){
 
         window[i] =
             0.5 -
             0.5 *
             Math.cos(
-                2 * Math.PI * i /
+                2 *
+                Math.PI *
+                i /
                 (fftSize - 1)
             );
 
     }
-
 
 
     const re =
@@ -138,21 +593,12 @@ export function drawSpectrogram(
         );
 
 
+    /*
+    ------------------------------------------------------
+    FFT
+    ------------------------------------------------------
+    */
 
-    // Display range
-
-    const minDb = -100;
-    const maxDb = 0;
-
-
-
-    // -----------------------------
-    // Calculate spectrogram
-    // -----------------------------
-
-    let minSeen = Infinity;
-    let maxSeen = -Infinity;
-    
     for(
         let x = 0;
         x < columns;
@@ -163,6 +609,9 @@ export function drawSpectrogram(
             x * hop;
 
 
+        /*
+        Run FFT once for this frame.
+        */
 
         for(
             let i = 0;
@@ -171,7 +620,10 @@ export function drawSpectrogram(
         ){
 
             re[i] =
-                (samples[offset+i] || 0)
+                (
+                    samples[offset + i] ||
+                    0
+                )
                 *
                 window[i];
 
@@ -180,10 +632,15 @@ export function drawSpectrogram(
         }
 
 
+        fft(
+            re,
+            im
+        );
 
-        fft(re, im);
 
-
+        /*
+        Frequency bins
+        */
 
         for(
             let y = 0;
@@ -191,49 +648,29 @@ export function drawSpectrogram(
             y++
         ){
 
+            const magnitude =
+                Math.sqrt(
+                    re[y] * re[y] +
+                    im[y] * im[y]
+                )
+                /
+                (fftSize / 2);
 
-        const magnitude =
-            Math.sqrt(
-                re[y] * re[y] +
-                im[y] * im[y]
-            ) /
-            (fftSize / 2);
 
-        if (x === 0 && y % 100 === 0) {
-            console.log(y, magnitude);
-        }
-            
-        // Very weak signal -> leave pixel white
-        if (magnitude < 1e-6) {
-        
-            const pixel =
-                (
-                    (rows - 1 - y) *
-                    columns +
-                    x
-                ) * 4;
-        
-            image.data[pixel]     = 255;
-            image.data[pixel + 1] = 255;
-            image.data[pixel + 2] = 255;
-            image.data[pixel + 3] = 255;
-        
-            continue;
-        }
-        
-        const db = 20 * Math.log10(magnitude);
-
-        minSeen = Math.min(minSeen, db);
-        maxSeen = Math.max(maxSeen, db);
+            const spl =
+                amplitudeToSPL(
+                    magnitude
+                );
 
 
             let value =
                 (
-                    db - minDb
+                    spl - minSPL
                 )
                 /
                 (
-                    maxDb - minDb
+                    maxSPL -
+                    minSPL
                 );
 
 
@@ -247,50 +684,47 @@ export function drawSpectrogram(
                 );
 
 
+            const colour =
+                getColour(
+                    value
+                );
 
-            // -----------------------------
-            // Same colour map as color bar
-            // -----------------------------
-
-            const [r, g, b] = magma(value);
 
             const pixel =
                 (
-                    (rows - 1 - y)
+                    (
+                        rows -
+                        1 -
+                        y
+                    )
                     *
-                    columns
-                    +
+                    columns +
                     x
                 )
                 *
                 4;
 
 
-
             image.data[pixel] =
-                r;
+                colour.r;
 
-            image.data[pixel+1] =
-                g;
+            image.data[pixel + 1] =
+                colour.g;
 
-            image.data[pixel+2] =
-                b;
+            image.data[pixel + 2] =
+                colour.b;
 
-            image.data[pixel+3] =
+            image.data[pixel + 3] =
                 255;
 
-
         }
-    }
-    console.log("Actual dB range:", minSeen, maxSeen);
 
-    ctx.fillStyle = "white";
-    ctx.fillRect(
-        0,
-        0,
-        canvas.width,
-        canvas.height
-    );
+    }
+
+
+    /*
+    Draw image
+    */
 
     ctx.putImageData(
         image,
@@ -299,142 +733,34 @@ export function drawSpectrogram(
     );
 
 
-    // -----------------------------
-    // Colour bar
-    // -----------------------------
-
-    const barWidth = 20;
+    /*
+    Colour bar
+    */
 
     const barX =
         leftMargin +
         columns +
-        20;
-    
-    // Draw the colour bar using the same magma() function
-    for (let y = 0; y < rows; y++) {
-    
-        const t = 1 - y / (rows - 1);
-    
-        const [r, g, b] = magma(t);
-    
-        ctx.fillStyle = `rgb(${r},${g},${b})`;
-        ctx.fillRect(barX, y, barWidth, 1);
-    }
+        25;
 
 
-
-    ctx.fillStyle =
-        "black";
-
-    ctx.font =
-        "12px Arial";
-
-
-    ctx.fillText(
-        "0 dB",
-        barX + 25,
-        12
+    drawColourBar(
+        ctx,
+        barX,
+        rows
     );
 
 
-    ctx.fillText(
-        "-20",
-        barX + 25,
-        rows * 0.2
+    /*
+    Axes
+    */
+
+    drawAxes(
+        ctx,
+        audioBuffer,
+        leftMargin,
+        columns,
+        rows
     );
-
-
-    ctx.fillText(
-        "-40",
-        barX + 25,
-        rows * 0.4
-    );
-
-
-    ctx.fillText(
-        "-60",
-        barX + 25,
-        rows * 0.6
-    );
-
-
-    ctx.fillText(
-        "-80",
-        barX + 25,
-        rows * 0.8
-    );
-
-
-    ctx.fillText(
-        "-100",
-        barX + 25,
-        rows - 5
-    );
-
-
-    // -----------------------------
-    // Axis labels
-    // -----------------------------
-    
-    ctx.fillStyle = "black";
-    ctx.font = "12px Arial";
-    
-    
-    // X axis time
-    
-    const duration =
-        audioBuffer.duration;
-    
-    
-    const timeSteps = 10;
-    
-    
-    for(let i = 0; i <= timeSteps; i++){
-    
-        const x =
-            leftMargin +
-            (i / timeSteps) *
-            columns;
-    
-    
-        ctx.fillText(
-            (
-                duration *
-                i /
-                timeSteps
-            ).toFixed(1) + " s",
-            x - 10,
-            rows + 25
-        );
-    
-    }
-    
-    
-    // Y axis frequency
-    
-    for(
-        let f = 0;
-        f <= 10000;
-        f += 2000
-    ){
-    
-        const y =
-            rows -
-            (
-                f /
-                10000
-            )
-            *
-            rows;
-    
-    
-        ctx.fillText(
-            f + " Hz",
-            5,
-            y + 4
-        );
-    
-    }
 
 
     console.log(
@@ -444,45 +770,87 @@ export function drawSpectrogram(
         rows,
         "frequency bins",
         "max Hz:",
-        maxFrequency
-    );
-
-    let energy = 0;
-
-    for(let i=0;i<samples.length;i++){
-        energy += Math.abs(samples[i]);
-    }
-    
-    console.log(
-        name,
-        "energy:",
-        energy
+        maxFrequency,
+        "dB SPL range:",
+        minSPL,
+        "-",
+        maxSPL
     );
 
 }
 
 
+/*
+==========================================================
+DRAW DIFFERENCE SPECTROGRAM
+==========================================================
+
+This shows:
+
+    ORIGINAL acoustic signal
+              -
+    HEARING-LOSS signal
+
+The colour represents how much acoustic energy has
+been removed by the hearing-loss processing.
+
+This is NOT an SPL display.
+
+It is an attenuation/information-loss display.
+
+----------------------------------------------------------
+
+0 dB   = essentially unchanged
+10 dB  = 10 dB reduction
+20 dB  = 20 dB reduction
+30 dB  = 30 dB reduction
+40 dB+ = very substantial reduction
+
+==========================================================
+*/
+
 export function drawDifferenceSpectrogram(
     originalBuffer,
     processedBuffer,
     canvas
-){
+) {
 
-    const ctx = canvas.getContext("2d");
+    if(
+        !originalBuffer ||
+        !processedBuffer ||
+        !canvas
+    ){
+
+        console.error(
+            "drawDifferenceSpectrogram: missing buffer or canvas"
+        );
+
+        return;
+
+    }
+
+
+    const ctx =
+        canvas.getContext("2d");
+
 
     const original =
         originalBuffer.getChannelData(0);
 
+
     const processed =
         processedBuffer.getChannelData(0);
+
 
     const sampleRate =
         originalBuffer.sampleRate;
 
-    const fftSize = 2048;
-    const hop = fftSize / 2;
 
-    const maxFrequency = 10000;
+    const fftSize = 2048;
+
+    const hop =
+        fftSize / 2;
+
 
     const rows =
         Math.floor(
@@ -491,14 +859,39 @@ export function drawDifferenceSpectrogram(
             sampleRate
         );
 
+
     const columns =
         Math.floor(
-            (original.length - fftSize) /
+            (
+                Math.min(
+                    original.length,
+                    processed.length
+                )
+                -
+                fftSize
+            )
+            /
             hop
         );
 
-    canvas.width = columns;
-    canvas.height = rows;
+
+    const leftMargin = 60;
+
+    const bottomMargin = 40;
+
+    const colorBarWidth = 120;
+
+
+    canvas.width =
+        leftMargin +
+        columns +
+        colorBarWidth;
+
+
+    canvas.height =
+        rows +
+        bottomMargin;
+
 
     const image =
         ctx.createImageData(
@@ -506,179 +899,445 @@ export function drawDifferenceSpectrogram(
             rows
         );
 
-    //-----------------------------------
-    // Hann window
-    //-----------------------------------
+
+    /*
+    Hann window
+    */
 
     const window =
         new Float32Array(
             fftSize
         );
 
-    for(let i=0;i<fftSize;i++){
+
+    for(
+        let i = 0;
+        i < fftSize;
+        i++
+    ){
 
         window[i] =
             0.5 -
             0.5 *
             Math.cos(
-                2*Math.PI*i/(fftSize-1)
+                2 *
+                Math.PI *
+                i /
+                (fftSize - 1)
             );
 
     }
 
-    //-----------------------------------
 
-    const re1 =
-        new Float32Array(fftSize);
+    const originalRe =
+        new Float32Array(
+            fftSize
+        );
 
-    const im1 =
-        new Float32Array(fftSize);
+    const originalIm =
+        new Float32Array(
+            fftSize
+        );
 
-    const re2 =
-        new Float32Array(fftSize);
 
-    const im2 =
-        new Float32Array(fftSize);
+    const processedRe =
+        new Float32Array(
+            fftSize
+        );
 
-    const minDb = -100;
-    const maxDb = 0;
+    const processedIm =
+        new Float32Array(
+            fftSize
+        );
 
-    for(let x=0;x<columns;x++){
+
+    /*
+    ------------------------------------------------------
+    Difference scale
+    ------------------------------------------------------
+
+    The difference spectrogram is attenuation in dB.
+
+    0 dB = no loss
+    40 dB = very large loss
+    ------------------------------------------------------
+    */
+
+    const minDifference = 0;
+
+    const maxDifference = 40;
+
+
+    /*
+    ------------------------------------------------------
+    Calculate difference
+    ------------------------------------------------------
+    */
+
+    for(
+        let x = 0;
+        x < columns;
+        x++
+    ){
 
         const offset =
             x * hop;
 
-        for(let i=0;i<fftSize;i++){
 
-            re1[i] =
-                (original[offset+i] || 0)
-                * window[i];
+        /*
+        ----------------------------------------------
+        ORIGINAL FFT
+        ----------------------------------------------
+        */
 
-            re2[i] =
-                (processed[offset+i] || 0)
-                * window[i];
+        for(
+            let i = 0;
+            i < fftSize;
+            i++
+        ){
 
-            im1[i]=0;
-            im2[i]=0;
+            originalRe[i] =
+                (
+                    original[offset + i] ||
+                    0
+                )
+                *
+                window[i];
+
+            originalIm[i] = 0;
 
         }
 
-        fft(re1,im1);
-        fft(re2,im2);
 
-        for(let y=0;y<rows;y++){
+        fft(
+            originalRe,
+            originalIm
+        );
 
-            const magOriginal =
+
+        /*
+        ----------------------------------------------
+        PROCESSED FFT
+        ----------------------------------------------
+        */
+
+        for(
+            let i = 0;
+            i < fftSize;
+            i++
+        ){
+
+            processedRe[i] =
+                (
+                    processed[offset + i] ||
+                    0
+                )
+                *
+                window[i];
+
+            processedIm[i] = 0;
+
+        }
+
+
+        fft(
+            processedRe,
+            processedIm
+        );
+
+
+        /*
+        ----------------------------------------------
+        Frequency bins
+        ----------------------------------------------
+        */
+
+        for(
+            let y = 0;
+            y < rows;
+            y++
+        ){
+
+            const originalMagnitude =
                 Math.sqrt(
-                    re1[y]*re1[y] +
-                    im1[y]*im1[y]
-                ) /
-                (fftSize/2);
+                    originalRe[y] *
+                    originalRe[y] +
+                    originalIm[y] *
+                    originalIm[y]
+                )
+                /
+                (fftSize / 2);
 
-            const magProcessed =
+
+            const processedMagnitude =
                 Math.sqrt(
-                    re2[y]*re2[y] +
-                    im2[y]*im2[y]
-                ) /
-                (fftSize/2);
+                    processedRe[y] *
+                    processedRe[y] +
+                    processedIm[y] *
+                    processedIm[y]
+                )
+                /
+                (fftSize / 2);
 
-            //--------------------------------
-            // Lost energy
-            //--------------------------------
 
-            const lost =
+            /*
+            Avoid division by zero.
+            */
+
+            const safeOriginal =
                 Math.max(
-                    0,
-                    magOriginal -
-                    magProcessed
+                    originalMagnitude,
+                    1e-10
                 );
 
-            const db =
+
+            const safeProcessed =
+                Math.max(
+                    processedMagnitude,
+                    1e-10
+                );
+
+
+            /*
+            ------------------------------------------
+            Attenuation
+
+            Positive number means signal was reduced.
+
+            Example:
+
+            original = -40 dB
+            processed = -60 dB
+
+            difference = 20 dB
+            ------------------------------------------
+            */
+
+            let difference =
                 20 *
                 Math.log10(
-                    Math.max(
-                        lost,
-                        1e-10
-                    )
+                    safeOriginal /
+                    safeProcessed
                 );
 
-            let t =
-                (db-minDb)/
-                (maxDb-minDb);
 
-            t =
+            /*
+            Hearing-loss processing should normally
+            produce positive attenuation.
+
+            If processing happens to increase a bin,
+            display it as zero loss.
+            */
+
+            difference =
+                Math.max(
+                    0,
+                    difference
+                );
+
+
+            /*
+            Map 0–40 dB to colour.
+            */
+
+            let value =
+                (
+                    difference -
+                    minDifference
+                )
+                /
+                (
+                    maxDifference -
+                    minDifference
+                );
+
+
+            value =
                 Math.max(
                     0,
                     Math.min(
                         1,
-                        t
+                        value
                     )
                 );
 
-            //--------------------------------
-            // Black -> Red -> Yellow -> White
-            //--------------------------------
 
-            let r,g,b;
+            /*
+            Colour
+            */
 
-            if(t < 0.5){
+            const colour =
+                getColour(
+                    value
+                );
 
-                const p = t/0.5;
-
-                r =
-                    Math.round(
-                        255*p
-                    );
-
-                g = 0;
-                b = 0;
-
-            }
-
-            else{
-
-                const p =
-                    (t-0.5)/0.5;
-
-                r = 255;
-
-                g =
-                    Math.round(
-                        255*p
-                    );
-
-                b =
-                    Math.round(
-                        255*p
-                    );
-
-            }
 
             const pixel =
                 (
-                    (rows-1-y)
+                    (
+                        rows -
+                        1 -
+                        y
+                    )
                     *
-                    columns
-                    +
+                    columns +
                     x
                 )
                 *
                 4;
 
-            image.data[pixel] = r;
-            image.data[pixel+1] = g;
-            image.data[pixel+2] = b;
-            image.data[pixel+3] = 255;
+
+            image.data[pixel] =
+                colour.r;
+
+            image.data[pixel + 1] =
+                colour.g;
+
+            image.data[pixel + 2] =
+                colour.b;
+
+            image.data[pixel + 3] =
+                255;
 
         }
 
     }
 
+
+    /*
+    Draw difference image
+    */
+
     ctx.putImageData(
         image,
-        0,
+        leftMargin,
         0
     );
+
+
+    /*
+    ------------------------------------------------------
+    Difference colour bar
+    ------------------------------------------------------
+    */
+
+    const barX =
+        leftMargin +
+        columns +
+        25;
+
+
+    const barWidth = 20;
+
+
+    const gradient =
+        ctx.createLinearGradient(
+            0,
+            rows,
+            0,
+            0
+        );
+
+
+    gradient.addColorStop(
+        0.0,
+        "black"
+    );
+
+    gradient.addColorStop(
+        0.25,
+        "blue"
+    );
+
+    gradient.addColorStop(
+        0.50,
+        "cyan"
+    );
+
+    gradient.addColorStop(
+        0.75,
+        "yellow"
+    );
+
+    gradient.addColorStop(
+        1.0,
+        "red"
+    );
+
+
+    ctx.fillStyle =
+        gradient;
+
+
+    ctx.fillRect(
+        barX,
+        0,
+        barWidth,
+        rows
+    );
+
+
+    /*
+    Difference labels
+    */
+
+    ctx.fillStyle =
+        "black";
+
+    ctx.font =
+        "12px Arial";
+
+
+    const differenceSteps = 8;
+
+
+    for(
+        let i = 0;
+        i <= differenceSteps;
+        i++
+    ){
+
+        const difference =
+            maxDifference -
+            (
+                i /
+                differenceSteps
+            )
+            *
+            maxDifference;
+
+
+        const y =
+            (
+                i /
+                differenceSteps
+            )
+            *
+            rows;
+
+
+        ctx.fillText(
+            Math.round(difference) +
+            " dB loss",
+            barX + 25,
+            y + 4
+        );
+
+    }
+
+
+    /*
+    Axes
+    */
+
+    drawAxes(
+        ctx,
+        originalBuffer,
+        leftMargin,
+        columns,
+        rows
+    );
+
 
     console.log(
         "Difference spectrogram drawn."
