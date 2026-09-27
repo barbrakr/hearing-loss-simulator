@@ -103,7 +103,7 @@ window.addEventListener(
     createAudiogram();
    
     createSpeechUI({
-        getAudioBuffer: () => processedBuffer,
+        getAudioBuffer: () => workingBuffer,
         getAudiogram: () => ({
             left: getLeftLoss(),
             right: getRightLoss(),
