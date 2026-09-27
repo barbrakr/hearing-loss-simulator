@@ -1,8 +1,4 @@
 import {
-    createSpeechUI
-} from "./speech.js";
-
-import {
     createNoiseBuffer
 } from "./noise.js";
 
