@@ -1,38 +1,17 @@
-// js/speech.js
-//
-// Transcribes the audio buffer already loaded into the simulator.
-//
-// Pipeline:
-//
-// loaded audio
-//      ↓
-// workingBuffer
-//      ↓
-// Whisper ASR
-//      ↓
-// transcript
-//      ↓
-// audiogram-dependent phoneme degradation
-//      ↓
-// simulated transcript
-//
-// No microphone is used.
+import { pipeline } from "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1";
 
-import {
-    pipeline
-} from "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1";
 
+// ------------------------------------------------------------
+// Whisper
+// ------------------------------------------------------------
+
+const MODEL = "onnx-community/whisper-small";
 
 let transcriber = null;
 let loadingPromise = null;
 
 
-/* ---------------------------------------------------------
-   LOAD WHISPER
---------------------------------------------------------- */
-
 async function getTranscriber(statusElement) {
-
     if (transcriber) {
         return transcriber;
     }
@@ -44,28 +23,18 @@ async function getTranscriber(statusElement) {
     loadingPromise = (async () => {
 
         statusElement.textContent =
-            "Loading speech recognition model… " +
-            "This may take a while the first time.";
+            "Loading speech recognition model…";
 
         /*
-         * Tiny is intentionally used initially because this
-         * application is client-side.
-         *
-         * For better recognition, change to:
-         *
-         * onnx-community/whisper-small
-         *
-         * or another appropriate multilingual Whisper model.
+         * Use WebGPU when available.
+         * Fall back to WASM otherwise.
          */
-
         const device =
-            navigator.gpu
-                ? "webgpu"
-                : "wasm";
+            navigator.gpu ? "webgpu" : "wasm";
 
         transcriber = await pipeline(
             "automatic-speech-recognition",
-            "onnx-community/whisper-tiny",
+            MODEL,
             {
                 device
             }
@@ -75,59 +44,60 @@ async function getTranscriber(statusElement) {
             "Speech recognition model ready.";
 
         return transcriber;
-
     })();
 
     return loadingPromise;
 }
 
 
-/* ---------------------------------------------------------
-   AUDIOBUFFER → MONO FLOAT32 @ 16 kHz
---------------------------------------------------------- */
+// ------------------------------------------------------------
+// AudioBuffer -> mono 16 kHz Float32Array
+// ------------------------------------------------------------
 
 function audioBufferToMono16k(audioBuffer) {
 
     const sourceRate =
         audioBuffer.sampleRate;
 
-    const length =
-        audioBuffer.length;
-
     const channels =
         audioBuffer.numberOfChannels;
 
+    const inputLength =
+        audioBuffer.length;
+
 
     /*
-     * First convert to mono.
+     * Downmix all channels to mono.
      */
-
     const mono =
-        new Float32Array(length);
+        new Float32Array(inputLength);
 
-    for (let c = 0; c < channels; c++) {
+    for (let channel = 0; channel < channels; channel++) {
 
-        const channel =
-            audioBuffer.getChannelData(c);
+        const data =
+            audioBuffer.getChannelData(channel);
 
-        for (let i = 0; i < length; i++) {
+        for (let i = 0; i < inputLength; i++) {
+
             mono[i] +=
-                channel[i] / channels;
+                data[i] / channels;
         }
     }
 
 
-    /*
-     * Whisper expects 16 kHz audio.
-     */
-
     const targetRate = 16000;
+
 
     if (sourceRate === targetRate) {
         return mono;
     }
 
 
+    /*
+     * Linear resampling.
+     *
+     * Whisper expects the waveform at 16 kHz.
+     */
     const outputLength =
         Math.round(
             mono.length *
@@ -138,15 +108,9 @@ function audioBufferToMono16k(audioBuffer) {
     const output =
         new Float32Array(outputLength);
 
-
-    /*
-     * Linear interpolation resampling.
-     *
-     * This is sufficient for the ASR input conversion.
-     */
-
     const ratio =
         sourceRate / targetRate;
+
 
     for (let i = 0; i < outputLength; i++) {
 
@@ -165,20 +129,20 @@ function audioBufferToMono16k(audioBuffer) {
         const fraction =
             position - left;
 
+
         output[i] =
-            mono[left] *
-            (1 - fraction) +
-            mono[right] *
-            fraction;
+            mono[left] * (1 - fraction) +
+            mono[right] * fraction;
     }
+
 
     return output;
 }
 
 
-/* ---------------------------------------------------------
-   AUDIO → TEXT
---------------------------------------------------------- */
+// ------------------------------------------------------------
+// Transcription
+// ------------------------------------------------------------
 
 export async function transcribeAudioBuffer(
     audioBuffer,
@@ -210,34 +174,43 @@ export async function transcribeAudioBuffer(
 
 
     statusElement.textContent =
-        "Transcribing audio…";
+        language
+            ? `Transcribing ${language} audio…`
+            : "Detecting language and transcribing…";
 
-
-    /*
-     * Whisper supports chunking for longer recordings.
-     *
-     * return_timestamps gives us speech segments which
-     * we can later use for more sophisticated phoneme
-     * processing.
-     */
 
     const options = {
+
+        /*
+         * Long recordings are processed in overlapping chunks.
+         */
         chunk_length_s: 30,
+
         stride_length_s: 5,
-        return_timestamps: true
+
+        /*
+         * Keep word-level timing.
+         * This will be useful later when we make
+         * the hearing-loss simulation more realistic.
+         */
+        return_timestamps: "word"
     };
 
 
     /*
-     * If the user tells us the language, giving Whisper
-     * the language improves recognition.
+     * If the user selected a language,
+     * constrain Whisper to that language.
      *
-     * null = automatic language detection.
+     * If language === null,
+     * Whisper can auto-detect it.
      */
-
     if (language) {
-        options.language = language;
-        options.task = "transcribe";
+
+        options.language =
+            language;
+
+        options.task =
+            "transcribe";
     }
 
 
@@ -256,243 +229,73 @@ export async function transcribeAudioBuffer(
 }
 
 
-/* ---------------------------------------------------------
-   AUDIOMETRIC MODEL
---------------------------------------------------------- */
-
-const PHONEMES = {
-
-    p: {
-        bands: [
-            [500, .30],
-            [1500, .45],
-            [3000, .25]
-        ]
-    },
-
-    b: {
-        bands: [
-            [500, .30],
-            [1500, .45],
-            [3000, .25]
-        ]
-    },
-
-    t: {
-        bands: [
-            [1500, .20],
-            [3000, .35],
-            [5000, .45]
-        ]
-    },
-
-    d: {
-        bands: [
-            [1500, .20],
-            [3000, .35],
-            [5000, .45]
-        ]
-    },
-
-    k: {
-        bands: [
-            [1500, .25],
-            [3000, .40],
-            [5000, .35]
-        ]
-    },
-
-    g: {
-        bands: [
-            [1500, .25],
-            [3000, .40],
-            [5000, .35]
-        ]
-    },
-
-    f: {
-        bands: [
-            [1000, .20],
-            [3000, .35],
-            [6000, .45]
-        ]
-    },
-
-    v: {
-        bands: [
-            [1000, .20],
-            [3000, .35],
-            [6000, .45]
-        ]
-    },
-
-    s: {
-        bands: [
-            [3000, .20],
-            [5000, .35],
-            [8000, .45]
-        ]
-    },
-
-    z: {
-        bands: [
-            [3000, .20],
-            [5000, .35],
-            [8000, .45]
-        ]
-    },
-
-    m: {
-        bands: [
-            [250, .45],
-            [500, .40],
-            [1000, .15]
-        ]
-    },
-
-    n: {
-        bands: [
-            [500, .40],
-            [1000, .35],
-            [2000, .25]
-        ]
-    },
-
-    l: {
-        bands: [
-            [500, .25],
-            [1000, .40],
-            [2000, .35]
-        ]
-    },
-
-    r: {
-        bands: [
-            [500, .25],
-            [1500, .40],
-            [2500, .35]
-        ]
-    },
-
-    h: {
-        bands: [
-            [1500, .30],
-            [3000, .40],
-            [5000, .30]
-        ]
-    },
-
-    a: {
-        bands: [
-            [700, .35],
-            [1200, .35],
-            [2500, .30]
-        ]
-    },
-
-    e: {
-        bands: [
-            [500, .35],
-            [1800, .45],
-            [2500, .20]
-        ]
-    },
-
-    i: {
-        bands: [
-            [300, .25],
-            [2300, .50],
-            [3000, .25]
-        ]
-    },
-
-    o: {
-        bands: [
-            [500, .35],
-            [900, .40],
-            [2500, .25]
-        ]
-    },
-
-    u: {
-        bands: [
-            [350, .35],
-            [900, .45],
-            [2200, .20]
-        ]
-    },
-
-    y: {
-        bands: [
-            [300, .25],
-            [1800, .45],
-            [2500, .30]
-        ]
-    }
-};
-
-
-/* ---------------------------------------------------------
-   AUDIOGRAM
---------------------------------------------------------- */
+// ------------------------------------------------------------
+// Audiogram interpolation
+// ------------------------------------------------------------
 
 function interpolateLoss(
     frequency,
-    losses,
-    frequencies
+    frequencies,
+    losses
 ) {
 
-    if (!losses || !frequencies) {
+    if (
+        !frequencies ||
+        !losses ||
+        frequencies.length === 0 ||
+        losses.length === 0
+    ) {
         return 0;
     }
+
 
     if (frequency <= frequencies[0]) {
         return losses[0];
     }
 
-    if (
-        frequency >=
-        frequencies[frequencies.length - 1]
-    ) {
-        return losses[losses.length - 1];
+
+    const last =
+        frequencies.length - 1;
+
+
+    if (frequency >= frequencies[last]) {
+        return losses[last];
     }
 
 
-    for (
-        let i = 0;
-        i < frequencies.length - 1;
-        i++
-    ) {
-
-        const f1 =
-            frequencies[i];
-
-        const f2 =
-            frequencies[i + 1];
+    for (let i = 0; i < last; i++) {
 
         if (
-            frequency >= f1 &&
-            frequency <= f2
+            frequency >= frequencies[i] &&
+            frequency <= frequencies[i + 1]
         ) {
 
             /*
-             * Audiograms are conventionally plotted
-             * on a logarithmic frequency axis.
+             * Audiogram frequencies are treated
+             * approximately logarithmically.
              */
+            const x1 =
+                Math.log10(
+                    frequencies[i]
+                );
+
+            const x2 =
+                Math.log10(
+                    frequencies[i + 1]
+                );
 
             const x =
-                (
-                    Math.log2(frequency) -
-                    Math.log2(f1)
-                ) /
-                (
-                    Math.log2(f2) -
-                    Math.log2(f1)
-                );
+                Math.log10(frequency);
+
+
+            const fraction =
+                (x - x1) /
+                (x2 - x1);
+
 
             return (
                 losses[i] +
-                x *
+                fraction *
                 (
                     losses[i + 1] -
                     losses[i]
@@ -501,204 +304,307 @@ function interpolateLoss(
         }
     }
 
+
     return 0;
 }
 
 
-/* ---------------------------------------------------------
-   PHONEME AUDIBILITY
---------------------------------------------------------- */
+// ------------------------------------------------------------
+// Phoneme / speech-sound profiles
+//
+// These are approximate perceptual profiles.
+// They are NOT a clinical hearing model.
+// ------------------------------------------------------------
 
-function phonemeAudibility(
-    phoneme,
-    leftLoss,
-    rightLoss,
-    frequencies
+const phonemeProfiles = {
+
+    // Stops
+    p: [[200, 1000]],
+    b: [[200, 1500]],
+
+    t: [[2500, 7000]],
+    d: [[1500, 5000]],
+
+    k: [[1500, 6000]],
+    g: [[1000, 5000]],
+
+
+    // Fricatives
+    f: [[1000, 8000]],
+    v: [[500, 5000]],
+
+    s: [[3500, 9000]],
+    z: [[2500, 8000]],
+
+    sh: [[1800, 8000]],
+    ch: [[2000, 9000]],
+
+    j: [[1500, 6000]],
+    h: [[1000, 6000]],
+
+
+    // Nasals
+    m: [[200, 2000]],
+    n: [[300, 4000]],
+    ng: [[300, 4000]],
+
+
+    // Liquids
+    l: [[300, 5000]],
+    r: [[300, 4000]],
+
+
+    /*
+     * Approximate vowel formant regions.
+     *
+     * These are deliberately broad.
+     */
+
+    a: [
+        [600, 1200],
+        [1000, 1800],
+        [2000, 3500]
+    ],
+
+    e: [
+        [400, 800],
+        [1700, 2600],
+        [2500, 3500]
+    ],
+
+    i: [
+        [250, 500],
+        [2000, 3500],
+        [3000, 4500]
+    ],
+
+    o: [
+        [300, 700],
+        [700, 1200],
+        [2200, 3500]
+    ],
+
+    u: [
+        [250, 500],
+        [500, 1100],
+        [2000, 3000]
+    ],
+
+
+    /*
+     * German rounded front vowels.
+     */
+
+    ae: [
+        [300, 700],
+        [1400, 2200],
+        [2500, 3500]
+    ],
+
+    oe: [
+        [300, 600],
+        [900, 1600],
+        [2200, 3500]
+    ],
+
+    ue: [
+        [250, 500],
+        [1200, 2200],
+        [2500, 4000]
+    ]
+};
+
+
+// ------------------------------------------------------------
+// Audibility of one frequency band
+// ------------------------------------------------------------
+
+function bandAudibility(
+    band,
+    audiogram
 ) {
 
-    const profile =
-        PHONEMES[phoneme];
-
-    if (!profile) {
-        return 1;
-    }
-
-    let result = 0;
-
-    for (
-        const [frequency, weight]
-        of profile.bands
-    ) {
-
-        const left =
-            interpolateLoss(
-                frequency,
-                leftLoss,
-                frequencies
-            );
-
-        const right =
-            interpolateLoss(
-                frequency,
-                rightLoss,
-                frequencies
-            );
-
-        /*
-         * Bilateral average.
-         *
-         * This is deliberately a simple perceptual
-         * approximation rather than a clinical
-         * binaural model.
-         */
-
-        const loss =
-            (left + right) / 2;
+    const [
+        low,
+        high
+    ] = band;
 
 
-        /*
-         * Smooth audibility function.
-         */
-
-        const available =
-            Math.max(
-                0,
-                Math.min(
-                    1,
-                    1 - loss / 60
-                )
-            );
-
-        result +=
-            weight * available;
-    }
-
-    return result;
-}
+    /*
+     * Geometric center frequency.
+     */
+    const center =
+        Math.sqrt(
+            low * high
+        );
 
 
-/* ---------------------------------------------------------
-   PHONEME RECOGNITION PROBABILITY
---------------------------------------------------------- */
+    const leftLoss =
+        interpolateLoss(
+            center,
+            audiogram.frequencies,
+            audiogram.left
+        );
 
-function recognitionProbability(
-    audibility
-) {
 
-    const midpoint = 0.45;
-    const slope = 8;
+    const rightLoss =
+        interpolateLoss(
+            center,
+            audiogram.frequencies,
+            audiogram.right
+        );
 
-    return (
-        1 /
+
+    /*
+     * For now use the average of both ears.
+     *
+     * We can later model binaural listening
+     * more realistically.
+     */
+    const averageLoss =
         (
-            1 +
-            Math.exp(
-                -slope *
-                (
-                    audibility -
-                    midpoint
-                )
-            )
+            leftLoss +
+            rightLoss
+        ) / 2;
+
+
+    /*
+     * Smooth psychometric approximation.
+     *
+     * 25 dB HL is treated as an approximate
+     * midpoint rather than a hard cutoff.
+     */
+    return 1 / (
+        1 +
+        Math.exp(
+            (averageLoss - 25) / 10
         )
     );
 }
 
 
-/* ---------------------------------------------------------
-   CHARACTER → APPROXIMATE PHONEME
---------------------------------------------------------- */
+// ------------------------------------------------------------
+// Phoneme audibility
+// ------------------------------------------------------------
 
-function characterPhoneme(
-    character
+function phonemeAudibility(
+    profile,
+    audiogram
 ) {
 
-    const c =
-        character.toLowerCase();
-
-    if (
-        "abcdefghijklmnopqrstuvwxyzäöü"
-        .includes(c)
-    ) {
-        return c;
+    if (!profile) {
+        return 0.7;
     }
 
-    return null;
+
+    const values =
+        profile.map(
+            band =>
+                bandAudibility(
+                    band,
+                    audiogram
+                )
+        );
+
+
+    return (
+        values.reduce(
+            (sum, value) =>
+                sum + value,
+            0
+        ) / values.length
+    );
 }
 
 
-/* ---------------------------------------------------------
-   DEGRADE TRANSCRIPT
---------------------------------------------------------- */
+// ------------------------------------------------------------
+// Approximate speech-perception degradation
+// ------------------------------------------------------------
 
-export function simulateSpeechPerception(
-    transcript,
-    leftLoss,
-    rightLoss,
-    frequencies
+function simulateSpeechPerception(
+    text,
+    audiogram
 ) {
 
-    if (!transcript) {
-        return "";
-    }
+    let output = "";
 
 
-    return transcript
-        .split("")
-        .map(character => {
+    for (const character of text) {
 
-            const phoneme =
-                characterPhoneme(
-                    character
-                );
+        const lower =
+            character.toLowerCase();
 
 
-            /*
-             * Spaces and punctuation survive.
-             */
-
-            if (!phoneme) {
-                return character;
-            }
+        let profile =
+            phonemeProfiles[lower];
 
 
-            const audibility =
-                phonemeAudibility(
-                    phoneme,
-                    leftLoss,
-                    rightLoss,
-                    frequencies
-                );
+        /*
+         * German umlauts.
+         */
+        if (lower === "ä") {
+
+            profile =
+                phonemeProfiles.ae;
+
+        } else if (lower === "ö") {
+
+            profile =
+                phonemeProfiles.oe;
+
+        } else if (lower === "ü") {
+
+            profile =
+                phonemeProfiles.ue;
+        }
 
 
-            const probability =
-                recognitionProbability(
+        /*
+         * Punctuation, spaces and unknown
+         * characters are left unchanged.
+         */
+        if (!profile) {
+
+            output += character;
+
+            continue;
+        }
+
+
+        const audibility =
+            phonemeAudibility(
+                profile,
+                audiogram
+            );
+
+
+        /*
+         * Don't make it completely deterministic.
+         */
+        const probability =
+            Math.max(
+                0.05,
+                Math.min(
+                    0.98,
                     audibility
-                );
+                )
+            );
 
 
-            /*
-             * Don't make high-frequency consonants
-             * disappear deterministically.
-             */
-
-            if (
-                Math.random() >
-                probability
-            ) {
-
-                return "·";
-            }
+        output +=
+            Math.random() < probability
+                ? character
+                : "·";
+    }
 
 
-            return character;
-        })
-        .join("");
+    return output;
 }
 
 
-/* ---------------------------------------------------------
-   UI
---------------------------------------------------------- */
+// ------------------------------------------------------------
+// UI
+// ------------------------------------------------------------
 
 export function createSpeechUI({
     getAudioBuffer,
@@ -706,75 +612,74 @@ export function createSpeechUI({
 }) {
 
     const container =
-        document.createElement(
-            "div"
-        );
+        document.createElement("section");
 
-    container.id =
-        "speechPerception";
+
+    container.className =
+        "speech-section";
+
 
     container.innerHTML = `
-
-        <hr>
-
-        <h2>Speech perception</h2>
+        <h2>Speech Perception</h2>
 
         <p>
             Transcribe the audio currently loaded
             in the simulator.
         </p>
 
-        <button id="transcribeAudioButton">
+        <label for="speech-language">
+            Language:
+        </label>
+
+        <select id="speech-language">
+
+            <option value="" selected>
+                Auto-detect
+            </option>
+
+            <option value="german">
+                Deutsch
+            </option>
+
+            <option value="english">
+                English
+            </option>
+
+        </select>
+
+        <br><br>
+
+        <button id="transcribe-audio">
             Transcribe loaded audio
         </button>
 
+        <p id="speech-status"></p>
+
+        <h3>Recognized speech</h3>
+
         <div
-            id="speechStatus"
-            style="margin-top:10px"
+            id="speech-transcript"
+            style="
+                padding: 12px;
+                border: 1px solid #ccc;
+                min-height: 40px;
+                white-space: pre-wrap;
+            "
         ></div>
 
-        <div
-            style="
-                margin-top:15px;
-                padding:12px;
-                border:1px solid #ccc;
-                border-radius:8px;
-            "
-        >
-            <strong>Transcript</strong>
-
-            <div
-                id="speechTranscript"
-                style="margin-top:8px"
-            ></div>
-        </div>
+        <h3>Approximate hearing-loss perception</h3>
 
         <div
+            id="speech-perception"
             style="
-                margin-top:15px;
-                padding:12px;
-                border:1px solid #ccc;
-                border-radius:8px;
+                padding: 12px;
+                border: 1px solid #ccc;
+                min-height: 40px;
+                white-space: pre-wrap;
             "
-        >
-            <strong>
-                Simulated speech perception
-            </strong>
-
-            <div
-                id="speechHeard"
-                style="
-                    margin-top:8px;
-                    font-size:1.25em;
-                "
-            ></div>
-        </div>
+        ></div>
     `;
 
-
-    /*
-     * Put it at the end of the main page.
-     */
 
     document.body.appendChild(
         container
@@ -782,98 +687,129 @@ export function createSpeechUI({
 
 
     const button =
-        document.getElementById(
-            "transcribeAudioButton"
+        container.querySelector(
+            "#transcribe-audio"
         );
+
 
     const status =
-        document.getElementById(
-            "speechStatus"
-        );
-
-    const transcriptElement =
-        document.getElementById(
-            "speechTranscript"
-        );
-
-    const heardElement =
-        document.getElementById(
-            "speechHeard"
+        container.querySelector(
+            "#speech-status"
         );
 
 
-    button.onclick =
+    const transcript =
+        container.querySelector(
+            "#speech-transcript"
+        );
+
+
+    const perception =
+        container.querySelector(
+            "#speech-perception"
+        );
+
+
+    const languageSelect =
+        container.querySelector(
+            "#speech-language"
+        );
+
+
+    button.addEventListener(
+        "click",
         async () => {
+
+            button.disabled = true;
+
+            transcript.textContent = "";
+            perception.textContent = "";
+
 
             try {
 
-                const audio =
+                /*
+                 * IMPORTANT:
+                 *
+                 * This gets the audio already loaded
+                 * by the simulator.
+                 *
+                 * No microphone is accessed.
+                 */
+                const audioBuffer =
                     getAudioBuffer();
 
-                if (!audio) {
 
-                    status.textContent =
-                        "Load an audio file first.";
+                if (!audioBuffer) {
 
-                    return;
+                    throw new Error(
+                        "Please load an audio file first."
+                    );
                 }
 
 
-                button.disabled = true;
+                /*
+                 * Empty string means:
+                 * let Whisper detect the language.
+                 */
+                const language =
+                    languageSelect.value ||
+                    null;
 
 
                 const result =
                     await transcribeAudioBuffer(
-                        audio,
-                        status
+                        audioBuffer,
+                        status,
+                        language
                     );
 
 
-                const transcript =
-                    result.text.trim();
+                transcript.textContent =
+                    result.text || "";
 
 
-                transcriptElement.textContent =
-                    transcript;
-
-
+                /*
+                 * Apply the audiogram-based
+                 * approximation to the recognized text.
+                 */
                 const audiogram =
                     getAudiogram();
 
 
-                const heard =
-                    simulateSpeechPerception(
-                        transcript,
-                        audiogram.left,
-                        audiogram.right,
-                        audiogram.frequencies
-                    );
+                if (
+                    audiogram &&
+                    result.text
+                ) {
 
+                    perception.textContent =
+                        simulateSpeechPerception(
+                            result.text,
+                            audiogram
+                        );
+                }
 
-                heardElement.textContent =
-                    heard;
-
-
-                status.textContent =
-                    "Done.";
 
             } catch (error) {
 
                 console.error(
-                    "Speech transcription error:",
+                    "Speech recognition error:",
                     error
                 );
 
+
                 status.textContent =
-                    "Speech recognition failed: " +
+                    "Speech recognition failed.";
+
+
+                transcript.textContent =
                     error.message;
+
 
             } finally {
 
                 button.disabled = false;
             }
-        };
-
-
-    return container;
+        }
+    );
 }
