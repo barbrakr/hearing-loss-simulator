@@ -123,8 +123,6 @@ export function createSpeechUI({
     getAudioBuffer,
     getAudiogram
 }) {
-    const container =
-        document.getElementById("speechRecognition");
 
     if (!container) {
         console.warn(
