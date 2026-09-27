@@ -648,7 +648,7 @@ export function createSpeechUI({
 
         <p id="speech-status"></p>
 
-        <h3>Recognized speech based on @huggingface/transformers@3.8.1 and selected language [!SIMULATION - NOT READY YET!]</h3>
+        <h3>Recognized speech [!SIMULATION - NOT READY YET!]</h3>
 
         <div
             id="speech-transcript"
