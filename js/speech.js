@@ -188,12 +188,6 @@ export async function transcribeAudioBuffer(
 
         stride_length_s: 5,
 
-        /*
-         * Keep word-level timing.
-         * This will be useful later when we make
-         * the hearing-loss simulation more realistic.
-         */
-        return_timestamps: "word"
     };
 
 
