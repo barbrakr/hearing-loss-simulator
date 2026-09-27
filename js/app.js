@@ -27,7 +27,7 @@ import {
     frequencies
 } from "./audiogram.js";
 
-
+import { createSpeechUI } from "./speech.js";
 import { AudioEngine } from "./audio.js";
 
 
@@ -105,6 +105,7 @@ window.addEventListener(
 ()=>{
 
     createAudiogram();
+   
     createSpeechUI({
         getAudioBuffer: () => workingBuffer,
     
