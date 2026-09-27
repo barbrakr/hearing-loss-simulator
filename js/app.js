@@ -1,3 +1,5 @@
+import "./speech.js";
+
 import {
     createNoiseBuffer
 } from "./noise.js";
