@@ -1,4 +1,6 @@
-import "./speech.js";
+import {
+    createSpeechUI
+} from "./speech.js";
 
 import {
     createNoiseBuffer
@@ -21,7 +23,8 @@ import {
 import {
     createAudiogram,
     getLeftLoss,
-    getRightLoss
+    getRightLoss,
+    frequencies
 } from "./audiogram.js";
 
 
@@ -102,7 +105,18 @@ window.addEventListener(
 ()=>{
 
     createAudiogram();
-
+    createSpeechUI({
+        getAudioBuffer: () => workingBuffer,
+    
+        getAudiogram: () => ({
+            left: getLeftLoss(),
+            right: getRightLoss(),
+    
+            // Use the exact frequencies already used
+            // by your audiogram.
+            frequencies
+        })
+    });
 
     originalCanvas =
         document.getElementById(
