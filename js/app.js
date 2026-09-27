@@ -103,14 +103,10 @@ window.addEventListener(
     createAudiogram();
    
     createSpeechUI({
-        getAudioBuffer: () => workingBuffer,
-    
+        getAudioBuffer: () => processedBuffer,
         getAudiogram: () => ({
             left: getLeftLoss(),
             right: getRightLoss(),
-    
-            // Use the exact frequencies already used
-            // by your audiogram.
             frequencies
         })
     });
