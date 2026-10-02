@@ -500,86 +500,46 @@ function phonemeAudibility(
    APPROXIMATE PERCEPTION
 ========================================================= */
 
-function simulateSpeechPerception(
-    text,
-    audiogram
-) {
 
+function simulateSpeechPerception(text, audiogram) {
     let output = "";
 
+    for (const character of text) {
+        const lower = character.toLowerCase();
 
-    for (
-        const character of text
-    ) {
-
-        const lower =
-            character.toLowerCase();
-
-
-        let profile =
-            phonemeProfiles[
-                lower
-            ];
-
+        let profile = phonemeProfiles[lower];
 
         if (lower === "ä") {
-
-            profile =
-                phonemeProfiles.ae;
-
-        } else if (
-            lower === "ö"
-        ) {
-
-            profile =
-                phonemeProfiles.oe;
-
-        } else if (
-            lower === "ü"
-        ) {
-
-            profile =
-                phonemeProfiles.ue;
+            profile = phonemeProfiles.ae;
+        } else if (lower === "ö") {
+            profile = phonemeProfiles.oe;
+        } else if (lower === "ü") {
+            profile = phonemeProfiles.ue;
         }
 
-
-        /*
-         * Leave spaces, punctuation
-         * and unknown characters alone.
-         */
-
+        // Preserve spaces, punctuation and unknown characters
         if (!profile) {
-
             output += character;
-
             continue;
         }
 
+        const audibility = phonemeAudibility(profile, audiogram);
 
-        const audibility =
-            phonemeAudibility(
-                profile,
-                audiogram
-            );
+        // Map audibility to a gentler masking probability
+        const hearingDifficulty = Math.max(
+            0,
+            Math.min(1, 1 - audibility)
+        );
 
+        const maskingProbability = Math.pow(
+            hearingDifficulty,
+            2
+        ) * 0.35;
 
-        const probability =
-            Math.max(
-                0.05,
-                Math.min(
-                    0.98,
-                    audibility
-                )
-            );
-
-
-        output +=
-            Math.random() <
-            probability
-                ? character
-                : "·";
+        output += Math.random() < maskingProbability
+            ? "·"
+            : character;
     }
-
 
     return output;
 }
