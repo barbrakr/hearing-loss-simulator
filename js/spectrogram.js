@@ -84,7 +84,8 @@ export function drawSpectrogram(
             )
         );
 
-
+    canvas.dataset.columns = columns;
+    
     const leftMargin = 60;
     const bottomMargin = 40;
 
@@ -403,7 +404,8 @@ export function drawDifferenceSpectrogram(
             )
         );
 
-
+    canvas.dataset.columns = columns;
+    
     const leftMargin = 60;
     const bottomMargin = 40;
     const colorBarWidth = 110;
