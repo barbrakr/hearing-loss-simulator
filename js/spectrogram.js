@@ -316,7 +316,7 @@ export function drawSpectrogram(
     );
 }
 
-
+updateProgressBarWidth();
 
 // ============================================================
 // DIFFERENCE SPECTROGRAM
