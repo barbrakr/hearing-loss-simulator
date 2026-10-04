@@ -30,32 +30,26 @@ background:#eeeeee;
 
 }
 
-#spectrogram {
-
-    width:100%;
-
-    height:400px;
-
-    border:1px solid black;
-
-}
-
 .spectrogram-container {
-
-    display:flex;
-    gap:20px;
-
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
+.spectrogram {
+    width: 100%;
+}
 
-.spectrogram-container canvas {
+.spectrogram-canvas-wrapper {
+    position: relative;
+    width: 100%;
+}
 
-    border:1px solid black;
-
-    width:600px;
-
-    height:300px;
-
+.spectrogram-canvas-wrapper canvas {
+    display: block;
+    width: 100%;
+    height: auto;
 }
 
 
