@@ -100,7 +100,10 @@ export function drawSpectrogram(
         rows +
         bottomMargin;
 
-
+    canvas.dataset.leftMargin = leftMargin;
+    canvas.dataset.columns = columns;
+    canvas.dataset.colorBarWidth = colorBarWidth;
+    
     // --------------------------------------------------------
     // Image
     // --------------------------------------------------------
@@ -415,7 +418,10 @@ export function drawDifferenceSpectrogram(
         rows +
         bottomMargin;
 
-
+    canvas.dataset.leftMargin = leftMargin;
+    canvas.dataset.columns = columns;
+    canvas.dataset.colorBarWidth = colorBarWidth;
+    
     const image =
         ctx.createImageData(
             columns,
