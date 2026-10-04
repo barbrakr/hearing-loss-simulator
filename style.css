@@ -60,15 +60,19 @@ background:#eeeeee;
 }
 
 #progress-container {
-    height: 8px;
     position: relative;
+    height: 8px;
+    background: #b8b8b8;
+    border-radius: 4px;
+    overflow: hidden;
 }
 
 #progress-fill {
     height: 100%;
     width: 0%;
+    background: #2196f3;
+    border-radius: 4px;
 }
-
 
 #playback-progress {
     width: 100%;
