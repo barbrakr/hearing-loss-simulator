@@ -201,6 +201,12 @@ function updateProgress() {
         progressFrame =
             requestAnimationFrame(updateProgress);
     } else {
+    
+        progressFill.style.width = "100%";
+    
+        playbackTime.textContent =
+            `${formatTime(duration)} / ${formatTime(duration)}`;
+    
         progressFrame = null;
     }
 }
