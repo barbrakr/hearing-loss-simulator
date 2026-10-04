@@ -184,6 +184,9 @@ function updateProgress() {
         : 0;
 
     progressFill.style.width = `${percentage}%`;
+
+    updateSpectrogramCursors(progress);
+    
     playbackTime.textContent =
         `${formatTime(elapsed)} / ${formatTime(duration)}`;
 
