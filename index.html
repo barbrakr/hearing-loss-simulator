@@ -126,21 +126,30 @@ Load Audio
 
 <div class="spectrogram-container">
 
-<div>
-<h3>Acoustic Signal</h3>
-<canvas id="originalSpectrogram"></canvas>
-</div>
+    <div class="spectrogram">
+        <h3>Original</h3>
+        <div class="spectrogram-canvas-wrapper">
+            <canvas id="spectrogram-original"></canvas>
+            <div id="cursor-original" class="spectrogram-cursor"></div>
+        </div>
+    </div>
 
-<div>
-<h3>Hearing Loss</h3>
-<canvas id="lossSpectrogram"></canvas>
-</div>
-  
-<div>
-<h3>Difference (Acoustic Signal - Hearing Loss)</h3>
-<canvas id="differenceSpectrogram"></canvas>  
-</div>
-  
+    <div class="spectrogram">
+        <h3>Hearing Loss</h3>
+        <div class="spectrogram-canvas-wrapper">
+            <canvas id="spectrogram-processed"></canvas>
+            <div id="cursor-processed" class="spectrogram-cursor"></div>
+        </div>
+    </div>
+
+    <div class="spectrogram">
+        <h3>Difference</h3>
+        <div class="spectrogram-canvas-wrapper">
+            <canvas id="spectrogram-difference"></canvas>
+            <div id="cursor-difference" class="spectrogram-cursor"></div>
+        </div>
+    </div>
+
 </div>
 
 <div id="playback-progress">
