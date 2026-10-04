@@ -216,9 +216,9 @@ function resetProgress() {
 function updateSpectrogramCursors(progress) {
 
     const canvasIds = [
-        ["spectrogram-original", "cursor-original"],
-        ["spectrogram-processed", "cursor-processed"],
-        ["spectrogram-difference", "cursor-difference"]
+        ["originalSpectrogram", "cursor-original"],
+        ["lossSpectrogram", "cursor-processed"],
+        ["differenceSpectrogram", "cursor-difference"]
     ];
 
     canvasIds.forEach(([canvasId, cursorId]) => {
