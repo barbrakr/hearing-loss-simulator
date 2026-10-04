@@ -679,9 +679,6 @@ export function drawDifferenceSpectrogram(
         leftMargin
     );
 
-
-    const columns =
-        Number(canvas.dataset.columns);
     
     const scale =
         canvas.getBoundingClientRect().width /
