@@ -680,6 +680,19 @@ export function drawDifferenceSpectrogram(
     );
 
 
+    const canvas =
+    document.getElementById("originalSpectrogram");
+
+    const columns =
+        Number(canvas.dataset.columns);
+    
+    const scale =
+        canvas.getBoundingClientRect().width /
+        canvas.width;
+    
+    document.getElementById("progress-container").style.width =
+        `${columns * scale}px`;
+
     console.log(
         "Difference spectrogram drawn."
     );
