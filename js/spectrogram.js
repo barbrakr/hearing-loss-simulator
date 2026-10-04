@@ -1448,8 +1448,9 @@ function drawAxes(
 
 
 export function updateProgressBarWidth() {
+
     const canvas =
-        document.getElementById("spectrogram-original");
+        document.getElementById("originalSpectrogram");
 
     const progressContainer =
         document.getElementById("progress-container");
@@ -1465,10 +1466,21 @@ export function updateProgressBarWidth() {
         return;
     }
 
+    const leftMargin = 60;
+
     const scale =
         canvas.getBoundingClientRect().width /
         canvas.width;
 
+    const imageWidth =
+        columns * scale;
+
+    const imageLeft =
+        leftMargin * scale;
+
     progressContainer.style.width =
-        `${columns * scale}px`;
+        `${imageWidth}px`;
+
+    progressContainer.style.marginLeft =
+        `${imageLeft}px`;
 }
