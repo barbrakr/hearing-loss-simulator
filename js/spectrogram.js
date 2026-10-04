@@ -1445,3 +1445,30 @@ function drawAxes(
         );
     }
 }
+
+
+export function updateProgressBarWidth() {
+    const canvas =
+        document.getElementById("spectrogram-original");
+
+    const progressContainer =
+        document.getElementById("progress-container");
+
+    if (!canvas || !progressContainer) {
+        return;
+    }
+
+    const columns =
+        Number(canvas.dataset.columns);
+
+    if (!columns) {
+        return;
+    }
+
+    const scale =
+        canvas.getBoundingClientRect().width /
+        canvas.width;
+
+    progressContainer.style.width =
+        `${columns * scale}px`;
+}
