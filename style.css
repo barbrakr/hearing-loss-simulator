@@ -45,7 +45,8 @@ background:#eeeeee;
 .spectrogram-canvas-wrapper {
     position: relative;
     width: 100%;
-    overflow: hidden;
+    min-width: 0;
+    overflow: visible;
 }
 
 .spectrogram-canvas-wrapper canvas {
@@ -53,7 +54,6 @@ background:#eeeeee;
     width: 100%;
     height: auto;
 }
-
 
 #playback-progress {
     width: 100%;
