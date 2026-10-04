@@ -77,3 +77,15 @@ background:#eeeeee;
     font-size: 14px;
     color: #555;
 }
+
+
+.spectrogram-cursor {
+    position: absolute;
+    top: 0;
+    bottom: 40px;
+    width: 2px;
+    background: white;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+    pointer-events: none;
+    z-index: 20;
+}
