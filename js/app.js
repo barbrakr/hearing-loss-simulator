@@ -210,6 +210,48 @@ function resetProgress() {
 }
 
 
+function updateSpectrogramCursors(progress) {
+
+    const canvasIds = [
+        ["spectrogram-original", "cursor-original"],
+        ["spectrogram-processed", "cursor-processed"],
+        ["spectrogram-difference", "cursor-difference"]
+    ];
+
+    canvasIds.forEach(([canvasId, cursorId]) => {
+
+        const canvas = document.getElementById(canvasId);
+        const cursor = document.getElementById(cursorId);
+
+        if (!canvas || !cursor) return;
+
+        const leftMargin =
+            Number(canvas.dataset.leftMargin || 60);
+
+        const columns =
+            Number(canvas.dataset.columns || 0);
+
+        if (!columns) return;
+
+        /*
+         * Canvas is scaled by CSS, so calculate the
+         * displayed scale factor.
+         */
+        const displayedWidth =
+            canvas.getBoundingClientRect().width;
+
+        const scale =
+            displayedWidth / canvas.width;
+
+        /*
+         * Position within the actual spectrogram image.
+         */
+        const x =
+            (leftMargin + progress * columns) * scale;
+
+        cursor.style.left = `${x}px`;
+    });
+}
 
 
 loadButton.onclick = async () => {
