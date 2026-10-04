@@ -680,9 +680,6 @@ export function drawDifferenceSpectrogram(
     );
 
 
-    const canvas =
-    document.getElementById("originalSpectrogram");
-
     const columns =
         Number(canvas.dataset.columns);
     
