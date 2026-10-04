@@ -572,7 +572,7 @@ export function createSpeechUI({
 
 
     container.innerHTML = `
-
+        <hr>
         <h2>Speech Perception</h2>
 
         <p>
