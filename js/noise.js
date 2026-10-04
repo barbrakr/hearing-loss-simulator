@@ -39,7 +39,7 @@ export async function createNoiseBuffer(
         const arrayBuffer =
             await response.arrayBuffer();
     
-        const traffic =
+        const music =
             await context.decodeAudioData(arrayBuffer);
 
         console.log(
