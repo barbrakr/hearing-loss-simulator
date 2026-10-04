@@ -80,7 +80,16 @@ this.source.connect(
 this.context.destination
 );
 
-this.source.start();
+const source = this.source;
+
+source.onended = () => {
+    if (this.source === source) {
+        this.source = null;
+    }
+};
+
+this.playbackStartTime = this.context.currentTime;
+source.start();
 
 }
 
