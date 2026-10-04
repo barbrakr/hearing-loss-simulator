@@ -167,30 +167,42 @@ function formatTime(seconds) {
 function updateProgress() {
     if (!engine.source || !engine.buffer) {
         progressFill.style.width = "0%";
+
         playbackTime.textContent =
             `0:00 / ${formatTime(engine.buffer?.duration || 0)}`;
+
+        updateSpectrogramCursors(0);
+
         progressFrame = null;
         return;
     }
 
     const duration = engine.buffer.duration;
+
     const elapsed = Math.min(
         engine.context.currentTime - engine.playbackStartTime,
         duration
     );
 
-    const percentage = duration > 0
-        ? (elapsed / duration) * 100
-        : 0;
+    const progress =
+        duration > 0
+            ? elapsed / duration
+            : 0;
 
-    progressFill.style.width = `${percentage}%`;
+    progressFill.style.width =
+        `${progress * 100}%`;
 
-    updateSpectrogramCursors(progress);
-    
     playbackTime.textContent =
         `${formatTime(elapsed)} / ${formatTime(duration)}`;
 
-    progressFrame = requestAnimationFrame(updateProgress);
+    updateSpectrogramCursors(progress);
+
+    if (elapsed < duration) {
+        progressFrame =
+            requestAnimationFrame(updateProgress);
+    } else {
+        progressFrame = null;
+    }
 }
 
 function startProgress() {
