@@ -150,6 +150,67 @@ const status =
 
 
 
+const progressFill =
+    document.getElementById("progress-fill");
+
+const playbackTime =
+    document.getElementById("playback-time");
+
+let progressFrame = null;
+
+function formatTime(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${minutes}:${String(secs).padStart(2, "0")}`;
+}
+
+function updateProgress() {
+    if (!engine.source || !engine.buffer) {
+        progressFill.style.width = "0%";
+        playbackTime.textContent =
+            `0:00 / ${formatTime(engine.buffer?.duration || 0)}`;
+        progressFrame = null;
+        return;
+    }
+
+    const duration = engine.buffer.duration;
+    const elapsed = Math.min(
+        engine.context.currentTime - engine.playbackStartTime,
+        duration
+    );
+
+    const percentage = duration > 0
+        ? (elapsed / duration) * 100
+        : 0;
+
+    progressFill.style.width = `${percentage}%`;
+    playbackTime.textContent =
+        `${formatTime(elapsed)} / ${formatTime(duration)}`;
+
+    progressFrame = requestAnimationFrame(updateProgress);
+}
+
+function startProgress() {
+    if (progressFrame !== null) {
+        cancelAnimationFrame(progressFrame);
+    }
+
+    updateProgress();
+}
+
+function resetProgress() {
+    if (progressFrame !== null) {
+        cancelAnimationFrame(progressFrame);
+        progressFrame = null;
+    }
+
+    progressFill.style.width = "0%";
+    playbackTime.textContent =
+        `0:00 / ${formatTime(engine.buffer?.duration || 0)}`;
+}
+
+
+
 
 loadButton.onclick = async () => {
 
@@ -375,16 +436,13 @@ processButton.onclick = async ()=>{
 
 
 
-playButton.onclick = ()=>{
-
+playButton.onclick = () => {
     engine.play();
-
+    startProgress();
 };
 
-
-stopButton.onclick = ()=>{
-
+stopButton.onclick = () => {
     engine.stop();
-
+    resetProgress();
 };
 
