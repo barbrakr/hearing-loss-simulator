@@ -29,6 +29,32 @@ export async function createNoiseBuffer(
             context
         );
     }
+
+
+     if(type === "music"){
+    
+        const response =
+            await fetch("audio/leberch-background-music-594950.wav");
+    
+        const arrayBuffer =
+            await response.arrayBuffer();
+    
+        const traffic =
+            await context.decodeAudioData(arrayBuffer);
+
+        console.log(
+            "Music:",
+            music.duration,
+            music.length,
+            music.sampleRate
+        );
+            
+        return matchLength(
+            music,
+            duration,
+            context
+        );
+    }
     
     if(type === "restaurant"){
         
