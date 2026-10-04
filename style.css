@@ -57,10 +57,13 @@ background:#eeeeee;
 
 .spectrogram-progress-wrapper {
     width: 100%;
+    box-sizing: border-box;
+    padding-left: 60px;
+    padding-right: 110px;
 }
 
 #progress-container {
-    position: relative;
+    width: 100%;
     height: 8px;
     background: #b8b8b8;
     border-radius: 4px;
@@ -68,8 +71,8 @@ background:#eeeeee;
 }
 
 #progress-fill {
-    height: 100%;
     width: 0%;
+    height: 100%;
     background: #2196f3;
     border-radius: 4px;
 }
