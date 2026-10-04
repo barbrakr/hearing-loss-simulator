@@ -28,7 +28,8 @@ export async function createNoiseBuffer(
             duration,
             context
         );
-
+    }
+    
     if(type === "restaurant chatter"){
         
             const response =
