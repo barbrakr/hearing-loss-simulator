@@ -1,6 +1,7 @@
-import {
-    pipeline
-} from "https://huggingface.co/onnx-community/whisper-large-v3-turbo";
+import { pipeline } from
+    "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1";
+
+const MODEL = "onnx-community/whisper-large-v3-turbo";
 
 /* ===
 FORMER MODEL
@@ -10,9 +11,6 @@ FORMER MODEL
 const MODEL =
     "onnx-community/whisper-small";
 ====== */
-
-const MODEL = 
-    "onnx-community/whisper-large-v3-turbo";
 
 let transcriber = null;
 let loadingPromise = null;
