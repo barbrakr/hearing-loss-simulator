@@ -1,15 +1,18 @@
 import { pipeline } from
+
     "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1";
-
-const MODEL = "onnx-community/whisper-large-v3-turbo";
-
-/* ===
-FORMER MODEL
-"https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1";
 
 
 const MODEL =
     "onnx-community/whisper-small";
+
+
+
+/* ===
+FORMER MODEL
+    "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1";
+
+const MODEL = "onnx-community/whisper-large-v3-turbo";
 ====== */
 
 let transcriber = null;
