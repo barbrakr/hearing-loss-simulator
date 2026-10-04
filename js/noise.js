@@ -33,7 +33,7 @@ export async function createNoiseBuffer(
     if(type === "restaurant"){
         
             const response =
-                await fetch("audio/freesound_community-restaurant-ambience-chatter-67319_boosted_300.wav");
+                await fetch("audio/freesound_community-restaurant-ambience-chatter-67319_boosted_300_boosted_300.wav");
         
             const arrayBuffer =
                 await response.arrayBuffer();
