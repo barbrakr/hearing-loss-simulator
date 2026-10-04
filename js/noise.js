@@ -28,7 +28,35 @@ export async function createNoiseBuffer(
             duration,
             context
         );
+
+    if(type === "restaurant"){
+        
+            const response =
+                await fetch("audio/freesound_community-restaurant-ambience-chatter-67319.wav");
+        
+            const arrayBuffer =
+                await response.arrayBuffer();
+        
+            const traffic =
+                await context.decodeAudioData(arrayBuffer);
+    
+            console.log(
+                "Restaurant:",
+                restaurant.duration,
+                restaurant.length,
+                restaurant.sampleRate
+            );
+                
+            return matchLength(
+                restaurant,
+                duration,
+                context
+            );
+        
     }
+
+
+    
     
     const length =
         Math.floor(
