@@ -1477,10 +1477,4 @@ export function updateProgressBarWidth() {
 
     const imageWidth =
         columns * scale;
-
-    progressContainer.style.marginLeft =
-        `${imageLeft}px`;
-
-    progressContainer.style.width =
-        `${imageWidth}px`;
 }
