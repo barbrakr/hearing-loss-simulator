@@ -8,7 +8,7 @@ import { fft } from "./dsp.js";
 const FFT_SIZE = 2048;
 const HOP = FFT_SIZE / 2;
 
-const MAX_FREQUENCY = 10000;
+const MAX_FREQUENCY = 11000;
 
 // Display range
 const MIN_DB_SPL = 0;
