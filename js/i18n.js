@@ -77,8 +77,8 @@ const translations = {
             können Sie diese Website-App als Bildungswerkzeug verwenden, um den
             Hörverlust Ihres Angehörigen besser nachzuvollziehen. Dazu können
             Sie das Audiogramm interaktiv eingeben und eigene Audiobeispiele
-            hochladen oder ein bereits aufgenommenes Beispiel aus dem Drop-down-
-            Menü auswählen. Es werden keine Daten gespeichert. Wenn Sie eine
+            hochladen oder ein bereits aufgenommenes Beispiel aus dem Drop-down-Menü auswählen.
+            Es werden keine Daten gespeichert. Wenn Sie eine
             Kopie für eine spätere Verwendung aufbewahren möchten, erstellen
             Sie bitte einen Screenshot der Daten und speichern Sie ihn lokal.
         `,
