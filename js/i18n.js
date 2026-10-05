@@ -107,17 +107,18 @@ export function setLanguage(language) {
         .querySelectorAll("[data-i18n]")
         .forEach(element => {
 
-            const key =
-                element.dataset.i18n;
+            const key = element.dataset.i18n;
 
-            if (
-                element.hasAttribute("data-i18n-html")
-            ) {
+            if (element.hasAttribute("data-i18n-html")) {
+
                 element.innerHTML =
                     translations[language][key];
+
             } else {
+
                 element.textContent =
                     translations[language][key];
+
             }
         });
 }
