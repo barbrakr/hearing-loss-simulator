@@ -15,7 +15,6 @@ import {
     applyHearingLoss
 } from "./processor.js";
 
-
 import {
     createAudiogram,
     getLeftLoss,
@@ -23,15 +22,17 @@ import {
     frequencies
 } from "./audiogram.js";
 
+import {
+    setLanguage
+} from "./i18n.js";
+
 import { createSpeechUI } from "./speech.js";
 import { AudioEngine } from "./audio.js";
 
 
 console.log("app.js loaded");
 
-import {
-    setLanguage
-} from "./i18n.js";
+
 
 const languageSelect =
     document.getElementById("language-select");
