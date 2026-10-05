@@ -530,3 +530,18 @@ stopButton.onclick = () => {
     engine.stop();
     resetProgress();
 };
+
+
+function setLanguage(language) {
+
+    document
+        .querySelectorAll("[data-i18n]")
+        .forEach(element => {
+
+            const key =
+                element.dataset.i18n;
+
+            element.textContent =
+                translations[language][key];
+        });
+}
