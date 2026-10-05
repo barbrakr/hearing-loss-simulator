@@ -13,11 +13,11 @@ const translations = {
             -5 to 19 decibel hearing level range, i.e. by using the tool provided
             by Stéphane Pigeon available
             <a href="https://hearingtest.online" target="_blank" rel="noopener noreferrer">
-                here
+                as a web-based hearingtest
             </a>
             or use the Mimi hearing test app available
             <a href="https://mimi.io/products/mimi-hearing-test-app" target="_blank" rel="noopener noreferrer">
-                here
+                as the Mimi hearing test app
             </a>
             (both last accessed on October 4th, 2026).
         `,
@@ -63,7 +63,7 @@ const translations = {
             normalen Bereichs von -5 bis 19 Dezibel Hörlevel liegt, beispielsweise
             mithilfe des von Stéphane Pigeon zur Verfügung gestellten
             <a href="https://hearingtest.online" target="_blank" rel="noopener noreferrer">
-                Hörtests
+                webbasierten Hörtests
             </a>
             oder mithilfe der
             <a href="https://mimi.io/products/mimi-hearing-test-app" target="_blank" rel="noopener noreferrer">
