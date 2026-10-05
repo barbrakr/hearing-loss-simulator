@@ -29,6 +29,14 @@ import { AudioEngine } from "./audio.js";
 
 console.log("app.js loaded");
 
+document
+    .getElementById("language-select")
+    .addEventListener("change", event => {
+
+        setLanguage(event.target.value);
+
+    });
+
 const translations = {
     en: {
         title: "Hearing Loss Simulator",
