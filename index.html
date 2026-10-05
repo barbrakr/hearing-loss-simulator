@@ -9,7 +9,7 @@
 name="viewport"
 content="width=device-width, initial-scale=1">
   
-<title>
+<title data-i18n="title">
 Hearing Loss Simulator
 </title>
   
@@ -20,11 +20,11 @@ href="style.css">
 </head>
 
 <body>
-
-<h1>
-Hearing Loss Simulator
+  
+<h1 data-i18n="title">
+    Hearing Loss Simulator
 </h1>
-
+  
 <h2>About</h2>
 
 This is an educational tool for individuals with normal hearing on specific hearing loss outcomes using concrete audio, spectrogram and speech perception measures. In order to use this tool effectively, please first make sure that your own hearing is at a normal -5 to 19 decibel hearing level range, i.e. by using the tool provided by Stéphane Pigeon available here: <a href="https://hearingtest.online">https://hearingtest.online</a> or use the Mimi hearing test app available here: <a href="https://mimi.io/products/mimi-hearing-test-app">https://mimi.io/products/mimi-hearing-test-app</a> (both last accessed on October 4th, 2026).
@@ -125,12 +125,16 @@ Load Audio
 
 <hr>
   
-<h2>Spectrograms</h2>
+<h2 data-i18n="spectrograms">
+    Spectrograms
+</h2>
 
 <div class="spectrogram-container">
 
     <div class="spectrogram">
-        <h3>Original</h3>
+        <h3 data-i18n="original">
+            Original
+        </h3>
         <div class="spectrogram-canvas-wrapper">
             <canvas id="originalSpectrogram"></canvas>
             <div id="cursor-original" class="spectrogram-cursor"></div>
@@ -138,7 +142,9 @@ Load Audio
     </div>
 
     <div class="spectrogram">
-        <h3>Hearing Loss</h3>
+        <h3 data-i18n="hearingLoss">
+            Hearing Loss
+        </h3>
         <div class="spectrogram-canvas-wrapper">
             <canvas id="lossSpectrogram"></canvas>
             <div id="cursor-processed" class="spectrogram-cursor"></div>
@@ -146,7 +152,9 @@ Load Audio
     </div>
 
     <div class="spectrogram">
-        <h3>Difference</h3>
+        <h3 data-i18n="difference">
+            Difference
+        </h3>
         <div class="spectrogram-canvas-wrapper">
             <canvas id="differenceSpectrogram"></canvas>
             <div id="cursor-difference" class="spectrogram-cursor"></div>
