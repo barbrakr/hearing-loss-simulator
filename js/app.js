@@ -29,35 +29,49 @@ import { AudioEngine } from "./audio.js";
 
 console.log("app.js loaded");
 
-document
-    .getElementById("language-select")
-    .addEventListener("change", event => {
+import {
+    setLanguage
+} from "./i18n.js";
 
-        setLanguage(event.target.value);
+const languageSelect =
+    document.getElementById("language-select");
 
-    });
+languageSelect.addEventListener(
+    "change",
+    event => {
 
-const translations = {
-    en: {
-        title: "Hearing Loss Simulator",
-        original: "Original",
-        hearingLoss: "Hearing Loss",
-        difference: "Difference",
-        play: "Play",
-        process: "Process",
-        spectrograms: "Spectrograms"
-    },
+        setLanguage(
+            event.target.value
+        );
 
-    de: {
-        title: "Hörverlust-Simulator",
-        original: "Original",
-        hearingLoss: "Hörverlust",
-        difference: "Unterschied",
-        play: "Abspielen",
-        process: "Verarbeiten",
-        spectrograms: "Spektrogramme"
     }
-};
+);
+
+
+const savedLanguage =
+    localStorage.getItem("language") || "en";
+
+setLanguage(savedLanguage);
+
+languageSelect.value =
+    savedLanguage;
+
+languageSelect.addEventListener(
+    "change",
+    event => {
+
+        const language =
+            event.target.value;
+
+        setLanguage(language);
+
+        localStorage.setItem(
+            "language",
+            language
+        );
+
+    }
+);
 
 
 const engine =
