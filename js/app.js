@@ -142,39 +142,43 @@ noiseButton.onclick = async () =>{
 };
 
 window.addEventListener(
-"DOMContentLoaded",
-()=>{
+    "DOMContentLoaded",
+    () => {
 
-    createAudiogram();
-   
-    createSpeechUI({
-        getAudioBuffer: () => workingBuffer,
-        getAudiogram: () => ({
-            left: getLeftLoss(),
-            right: getRightLoss(),
-            frequencies
-        })
-    });
+        createAudiogram();
 
-    originalCanvas =
-        document.getElementById(
-            "originalSpectrogram"
+        createSpeechUI({
+            getAudioBuffer: () => workingBuffer,
+            getAudiogram: () => ({
+                left: getLeftLoss(),
+                right: getRightLoss(),
+                frequencies
+            })
+        });
+
+        originalCanvas =
+            document.getElementById(
+                "originalSpectrogram"
+            );
+
+        lossCanvas =
+            document.getElementById(
+                "lossSpectrogram"
+            );
+
+        console.log(
+            "Canvas:",
+            originalCanvas,
+            lossCanvas
         );
 
-
-    lossCanvas =
-        document.getElementById(
-            "lossSpectrogram"
+        window.addEventListener(
+            "resize",
+            updateProgressBarWidth
         );
 
-
-    console.log(
-        "Canvas:",
-        originalCanvas,
-        lossCanvas
-    );
-
-});
+    }
+);
 
 
 const loadButton =
