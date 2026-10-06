@@ -550,3 +550,65 @@ stopButton.onclick = () => {
     engine.stop();
     resetProgress();
 };
+
+
+export function updateProgressBarWidth() {
+
+    const canvas =
+        document.getElementById(
+            "spectrogram-original"
+        );
+
+    const progressContainer =
+        document.getElementById(
+            "progress-container"
+        );
+
+    if (!canvas || !progressContainer) {
+        return;
+    }
+
+    const columns =
+        Number(
+            canvas.dataset.columns
+        );
+
+    if (!columns) {
+        return;
+    }
+
+    const leftMargin =
+        Number(
+            canvas.dataset.leftMargin
+        );
+
+    const colorBarWidth =
+        Number(
+            canvas.dataset.colorBarWidth
+        );
+
+    const canvasRect =
+        canvas.getBoundingClientRect();
+
+    const canvasScale =
+        canvasRect.width /
+        canvas.width;
+
+    const imageLeft =
+        leftMargin *
+        canvasScale;
+
+    const imageWidth =
+        columns *
+        canvasScale;
+
+    progressContainer.style.setProperty(
+        "--spectrogram-image-left",
+        `${imageLeft}px`
+    );
+
+    progressContainer.style.setProperty(
+        "--spectrogram-image-width",
+        `${imageWidth}px`
+    );
+}
