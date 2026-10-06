@@ -190,16 +190,70 @@ export function createAudiogram(){
         }
 
 
-
+        // legend
+        
+        const legendX = width - 150;
+        const legendY = 20;
+        
+        ctx.font = "12px Arial";
+        ctx.textAlign = "left";
+        
+        // Left
+        ctx.strokeStyle = "#1976d2";
+        ctx.lineWidth = 3;
+        
+        ctx.beginPath();
+        ctx.moveTo(
+            legendX,
+            legendY
+        );
+        ctx.lineTo(
+            legendX + 25,
+            legendY
+        );
+        ctx.stroke();
+        
+        ctx.fillStyle = "#1976d2";
+        
+        ctx.fillText(
+            "Left",
+            legendX + 32,
+            legendY + 4
+        );
+        
+        
+        // Right
+        ctx.strokeStyle = "#d32f2f";
+        
+        ctx.beginPath();
+        ctx.moveTo(
+            legendX + 75,
+            legendY
+        );
+        ctx.lineTo(
+            legendX + 100,
+            legendY
+        );
+        ctx.stroke();
+        
+        ctx.fillStyle = "#d32f2f";
+        
+        ctx.fillText(
+            "Right",
+            legendX + 107,
+            legendY + 4
+        );
+        
+        // curves
+        
         drawCurve(
             leftLoss,
-            "blue"
+            "#1976d2"
         );
-
-
+        
         drawCurve(
             rightLoss,
-            "red"
+            "#d32f2f"
         );
 
     }
