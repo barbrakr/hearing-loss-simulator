@@ -115,7 +115,7 @@ function processChannel(
         This remains 1.0 by default.
     */
 
-    const simulationStrength = 0.6;
+    const simulationStrength = 1.0;
 
 
     /*
