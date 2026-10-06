@@ -26,6 +26,551 @@ const MAX_DB_SPL = 80;
 // Standard atmospheric reference pressure:
 const REFERENCE_PRESSURE = 20e-6;
 
+// ============================================================
+// SYNCHRONIZED SPECTROGRAM INTERACTION
+// ============================================================
+
+const spectrogramCanvasIds = [
+    "originalSpectrogram",
+    "lossSpectrogram",
+    "differenceSpectrogram"
+];
+
+let spectrogramInteractionInitialized = false;
+
+
+function initializeSpectrogramInteraction() {
+
+    if (spectrogramInteractionInitialized) {
+        return;
+    }
+
+    const canvases =
+        spectrogramCanvasIds
+            .map(id =>
+                document.getElementById(id)
+            )
+            .filter(Boolean);
+
+    // Wait until all three canvases exist.
+    if (canvases.length !== 3) {
+        return;
+    }
+
+    spectrogramInteractionInitialized = true;
+
+
+    canvases.forEach(canvas => {
+
+        const wrapper =
+            canvas.parentElement;
+
+
+        // ----------------------------------------------------
+        // Vertical hover line
+        // ----------------------------------------------------
+
+        const vertical =
+            document.createElement("div");
+
+        vertical.className =
+            "spectrogram-hover-vertical";
+
+        wrapper.appendChild(vertical);
+
+
+        // ----------------------------------------------------
+        // Horizontal hover line
+        // ----------------------------------------------------
+
+        const horizontal =
+            document.createElement("div");
+
+        horizontal.className =
+            "spectrogram-hover-horizontal";
+
+        wrapper.appendChild(horizontal);
+
+
+        // ----------------------------------------------------
+        // Mouse interaction
+        // ----------------------------------------------------
+
+        canvas.addEventListener(
+            "mousemove",
+            event => {
+
+                updateSpectrogramInteraction(
+                    canvas,
+                    event
+                );
+            }
+        );
+
+
+        canvas.addEventListener(
+            "mouseleave",
+            () => {
+
+                hideSpectrogramInteraction();
+            }
+        );
+    });
+}
+
+
+
+function updateSpectrogramInteraction(
+    sourceCanvas,
+    event
+) {
+
+    const data =
+        sourceCanvas._spectrogramData;
+
+    if (!data) {
+        return;
+    }
+
+
+    const rect =
+        sourceCanvas.getBoundingClientRect();
+
+
+    // Convert mouse position from CSS pixels
+    // to actual canvas pixels.
+
+    const canvasX =
+        (
+            event.clientX -
+            rect.left
+        )
+        *
+        (
+            sourceCanvas.width /
+            rect.width
+        );
+
+
+    const canvasY =
+        (
+            event.clientY -
+            rect.top
+        )
+        *
+        (
+            sourceCanvas.height /
+            rect.height
+        );
+
+
+    const leftMargin =
+        Number(
+            sourceCanvas.dataset.leftMargin
+        );
+
+
+    const columns =
+        Number(
+            sourceCanvas.dataset.columns
+        );
+
+
+    const rows =
+        Number(
+            data.rows
+        );
+
+
+    // --------------------------------------------------------
+    // Ignore the frequency axis
+    // --------------------------------------------------------
+
+    if (
+        canvasX < leftMargin
+    ) {
+
+        hideSpectrogramInteraction();
+
+        return;
+    }
+
+
+    // --------------------------------------------------------
+    // Ignore colour bar / right side
+    // --------------------------------------------------------
+
+    if (
+        canvasX >=
+        leftMargin + columns
+    ) {
+
+        hideSpectrogramInteraction();
+
+        return;
+    }
+
+
+    // --------------------------------------------------------
+    // Ignore bottom time axis
+    // --------------------------------------------------------
+
+    if (
+        canvasY < 0 ||
+        canvasY >= rows
+    ) {
+
+        hideSpectrogramInteraction();
+
+        return;
+    }
+
+
+    // --------------------------------------------------------
+    // Spectrogram image pixel
+    // --------------------------------------------------------
+
+    const imageX =
+        Math.floor(
+            canvasX - leftMargin
+        );
+
+
+    const imageY =
+        Math.floor(
+            canvasY
+        );
+
+
+    // --------------------------------------------------------
+    // Time
+    //
+    // Use the centre of the FFT window.
+    // --------------------------------------------------------
+
+    const time =
+        (
+            imageX * HOP +
+            FFT_SIZE / 2
+        )
+        /
+        data.sampleRate;
+
+
+    // --------------------------------------------------------
+    // Frequency
+    //
+    // The image is vertically flipped when drawn:
+    //
+    // FFT bin 0       -> bottom
+    // highest bin     -> top
+    // --------------------------------------------------------
+
+    const fftBin =
+        rows -
+        1 -
+        imageY;
+
+
+    const frequency =
+        fftBin *
+        data.sampleRate /
+        FFT_SIZE;
+
+
+    if (
+        frequency < 0 ||
+        frequency > MAX_FREQUENCY
+    ) {
+
+        hideSpectrogramInteraction();
+
+        return;
+    }
+
+
+    // --------------------------------------------------------
+    // Move all three crosshairs
+    // --------------------------------------------------------
+
+    spectrogramCanvasIds.forEach(
+        id => {
+
+            const canvas =
+                document.getElementById(id);
+
+            if (!canvas) {
+                return;
+            }
+
+
+            const canvasData =
+                canvas._spectrogramData;
+
+            if (!canvasData) {
+                return;
+            }
+
+
+            const wrapper =
+                canvas.parentElement;
+
+
+            const vertical =
+                wrapper.querySelector(
+                    ".spectrogram-hover-vertical"
+                );
+
+
+            const horizontal =
+                wrapper.querySelector(
+                    ".spectrogram-hover-horizontal"
+                );
+
+
+            const canvasRect =
+                canvas.getBoundingClientRect();
+
+
+            const wrapperRect =
+                wrapper.getBoundingClientRect();
+
+
+            const scaleX =
+                canvasRect.width /
+                canvas.width;
+
+
+            const scaleY =
+                canvasRect.height /
+                canvas.height;
+
+
+            const x =
+                (
+                    leftMargin +
+                    imageX
+                )
+                *
+                scaleX
+                +
+                (
+                    canvasRect.left -
+                    wrapperRect.left
+                );
+
+
+            const y =
+                imageY *
+                scaleY
+                +
+                (
+                    canvasRect.top -
+                    wrapperRect.top
+                );
+
+
+            vertical.style.left =
+                `${x}px`;
+
+            vertical.style.top =
+                `${canvasRect.top - wrapperRect.top}px`;
+
+            vertical.style.height =
+                `${rows * scaleY}px`;
+
+            vertical.style.display =
+                "block";
+
+
+            horizontal.style.left =
+                `${
+                    canvasRect.left -
+                    wrapperRect.left +
+                    leftMargin * scaleX
+                }px`;
+
+            horizontal.style.top =
+                `${y}px`;
+
+            horizontal.style.width =
+                `${columns * scaleX}px`;
+
+            horizontal.style.display =
+                "block";
+        }
+    );
+
+
+    // --------------------------------------------------------
+    // Read the three values
+    // --------------------------------------------------------
+
+    const original =
+        getSpectrogramValue(
+            "originalSpectrogram",
+            imageX,
+            imageY
+        );
+
+
+    const hearingLoss =
+        getSpectrogramValue(
+            "lossSpectrogram",
+            imageX,
+            imageY
+        );
+
+
+    const difference =
+        getSpectrogramValue(
+            "differenceSpectrogram",
+            imageX,
+            imageY
+        );
+
+
+    // --------------------------------------------------------
+    // Show ONE shared tooltip
+    // --------------------------------------------------------
+
+    showSpectrogramTooltip(
+        sourceCanvas,
+        time,
+        frequency,
+        original,
+        hearingLoss,
+        difference
+    );
+}
+
+
+function getSpectrogramValue(
+    canvasId,
+    x,
+    y
+) {
+
+    const canvas =
+        document.getElementById(canvasId);
+
+    if (
+        !canvas ||
+        !canvas._spectrogramData
+    ) {
+        return null;
+    }
+
+
+    const data =
+        canvas._spectrogramData;
+
+
+    if (
+        x < 0 ||
+        x >= data.columns ||
+        y < 0 ||
+        y >= data.rows
+    ) {
+        return null;
+    }
+
+
+    return data.values[
+        y *
+        data.columns +
+        x
+    ];
+}
+
+
+function showSpectrogramTooltip(
+    sourceCanvas,
+    time,
+    frequency,
+    original,
+    hearingLoss,
+    difference
+) {
+
+    const wrapper =
+        sourceCanvas.parentElement;
+
+
+    let tooltip =
+        wrapper.querySelector(
+            ".spectrogram-hover-tooltip"
+        );
+
+
+    if (!tooltip) {
+
+        tooltip =
+            document.createElement("div");
+
+        tooltip.className =
+            "spectrogram-hover-tooltip";
+
+        wrapper.appendChild(tooltip);
+    }
+
+
+    tooltip.innerHTML = `
+        <strong>
+            ${time.toFixed(2)} s
+            &nbsp; | &nbsp;
+            ${Math.round(frequency)} Hz
+        </strong>
+
+        <br>
+
+        Original:
+        ${
+            original !== null
+                ? original.toFixed(1) + " dB SPL"
+                : "—"
+        }
+
+        <br>
+
+        Hearing Loss:
+        ${
+            hearingLoss !== null
+                ? hearingLoss.toFixed(1) + " dB SPL"
+                : "—"
+        }
+
+        <br>
+
+        Difference:
+        ${
+            difference !== null
+                ? difference.toFixed(1) + " dB"
+                : "—"
+        }
+    `;
+
+
+    tooltip.style.display =
+        "block";
+}
+
+
+function hideSpectrogramInteraction() {
+
+    document
+        .querySelectorAll(
+            ".spectrogram-hover-vertical, " +
+            ".spectrogram-hover-horizontal, " +
+            ".spectrogram-hover-tooltip"
+        )
+        .forEach(element => {
+
+            element.style.display =
+                "none";
+        });
+}
+
 
 // ============================================================
 // DRAW NORMAL SPECTROGRAM
@@ -115,6 +660,10 @@ export function drawSpectrogram(
             rows
         );
 
+    const dbData =
+        new Float32Array(
+            columns * rows
+        );
 
     // --------------------------------------------------------
     // Hann window
@@ -229,7 +778,16 @@ export function drawSpectrogram(
                 amplitudeToDbSpl(
                     magnitude
                 );
-
+            
+            dbData[
+                        (
+                            (rows - 1 - y)
+                            *
+                            columns
+                        )
+                        +
+                        x
+                    ] = dbSpl;
 
             const color =
                 dbSplToColor(
@@ -304,7 +862,16 @@ export function drawSpectrogram(
         leftMargin
     );
 
-
+    canvas._spectrogramData = {
+        values: dbData,
+        columns: columns,
+        rows: rows,
+        sampleRate: sampleRate,
+        duration: audioBuffer.duration
+    };
+    
+    initializeSpectrogramInteraction();
+    
     console.log(
         name,
         columns,
@@ -430,6 +997,10 @@ export function drawDifferenceSpectrogram(
             rows
         );
 
+    const differenceData =
+        new Float32Array(
+            columns * rows
+        );
 
     // --------------------------------------------------------
     // Hann window
@@ -612,6 +1183,15 @@ export function drawDifferenceSpectrogram(
                 differenceDb = 0;
             }
 
+            differenceData[
+                (
+                    (rows - 1 - y)
+                    *
+                    columns
+                )
+                +
+                x
+            ] = differenceDb;
 
             // ------------------------------------------------
             // Difference display
@@ -681,6 +1261,15 @@ export function drawDifferenceSpectrogram(
         leftMargin
     );
 
+    canvas._spectrogramData = {
+        values: differenceData,
+        columns: columns,
+        rows: rows,
+        sampleRate: sampleRate,
+        duration: originalBuffer.duration
+    };
+    
+    initializeSpectrogramInteraction();
     
     const scale =
         canvas.getBoundingClientRect().width /
