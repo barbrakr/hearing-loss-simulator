@@ -521,6 +521,8 @@ processButton.onclick = async ()=>{
             engine.buffer,
             document.getElementById("differenceSpectrogram")
         );
+
+        updateProgressBarWidth();
         
         console.log(
             "After loss:",
@@ -556,7 +558,7 @@ export function updateProgressBarWidth() {
 
     const canvas =
         document.getElementById(
-            "spectrogram-original"
+            "originalSpectrogram"
         );
 
     const progressContainer =
