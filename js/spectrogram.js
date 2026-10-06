@@ -1677,65 +1677,33 @@ function drawColorBar(
         25;
 
 
+   const legendMargin = 15;
+    const legendHeight = rows - 2 * legendMargin;
+    
     const gradient =
         ctx.createLinearGradient(
             0,
-            rows,
+            legendMargin + legendHeight,
             0,
-            0
+            legendMargin
         );
-
-
-    gradient.addColorStop(
-        0.00,
-        "black"
-    );
-
-    gradient.addColorStop(
-        0.25,
-        "#000078"
-    );
-
-    gradient.addColorStop(
-        0.375,
-        "#0050ff"
-    );
-
-    gradient.addColorStop(
-        0.50,
-        "#00dcff"
-    );
-
-    gradient.addColorStop(
-        0.625,
-        "#00dc50"
-    );
-
-    gradient.addColorStop(
-        0.75,
-        "yellow"
-    );
-
-    gradient.addColorStop(
-        0.875,
-        "orange"
-    );
-
-    gradient.addColorStop(
-        1.00,
-        "red"
-    );
-
-
-    ctx.fillStyle =
-        gradient;
-
-
+    
+    gradient.addColorStop(0.00, "black");
+    gradient.addColorStop(0.25, "#000078");
+    gradient.addColorStop(0.375, "#0050ff");
+    gradient.addColorStop(0.50, "#00dcff");
+    gradient.addColorStop(0.625, "#00dc50");
+    gradient.addColorStop(0.75, "yellow");
+    gradient.addColorStop(0.875, "orange");
+    gradient.addColorStop(1.00, "red");
+    
+    ctx.fillStyle = gradient;
+    
     ctx.fillRect(
         barX,
-        0,
+        legendMargin,
         barWidth,
-        rows
+        legendHeight
     );
 
 
@@ -1783,13 +1751,9 @@ function drawColorBar(
     ) {
 
         const y =
-            rows -
-            (
-                label.db /
-                MAX_DB_SPL
-            )
-            *
-            rows;
+            legendMargin +
+            legendHeight -
+            (label.db / MAX_DB_SPL) * legendHeight;
 
 
         ctx.fillText(
@@ -1821,60 +1785,33 @@ function drawDifferenceColorBar(
         25;
 
 
+   const legendMargin = 15;
+    const legendHeight =
+        rows - 2 * legendMargin;
+    
     const gradient =
         ctx.createLinearGradient(
             0,
-            rows,
+            legendMargin + legendHeight,
             0,
-            0
+            legendMargin
         );
-
-
-    gradient.addColorStop(
-        0.00,
-        "#0a0a28"
-    );
-
-    gradient.addColorStop(
-        0.10,
-        "#0050ff"
-    );
-
-    gradient.addColorStop(
-        0.20,
-        "#00dcff"
-    );
-
-    gradient.addColorStop(
-        0.40,
-        "#00dc50"
-    );
-
-    gradient.addColorStop(
-        0.60,
-        "yellow"
-    );
-
-    gradient.addColorStop(
-        0.80,
-        "orange"
-    );
-
-    gradient.addColorStop(
-        1.00,
-        "red"
-    );
-
-
-    ctx.fillStyle =
-        gradient;
-
-
+    
+    gradient.addColorStop(0.00, "#0a0a28");
+    gradient.addColorStop(0.10, "#0050ff");
+    gradient.addColorStop(0.20, "#00dcff");
+    gradient.addColorStop(0.40, "#00dc50");
+    gradient.addColorStop(0.60, "yellow");
+    gradient.addColorStop(0.80, "orange");
+    gradient.addColorStop(1.00, "red");
+    
+    ctx.fillStyle = gradient;
+    
     ctx.fillRect(
         barX,
-        0,
+        legendMargin,
         barWidth,
-        rows
+        legendHeight
     );
 
 
@@ -1923,13 +1860,9 @@ function drawDifferenceColorBar(
     ) {
 
         const y =
-            rows -
-            (
-                label.db /
-                50
-            )
-            *
-            rows;
+            legendMargin +
+            legendHeight -
+            (label.db / 50) * legendHeight;
 
 
         ctx.fillText(
