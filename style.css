@@ -111,3 +111,48 @@ background:#eeeeee;
     pointer-events: none;
     z-index: 20;
 }
+
+
+
+.spectrogram-hover-vertical,
+.spectrogram-hover-horizontal {
+    position: absolute;
+    background: white;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+    pointer-events: none;
+    z-index: 30;
+    display: none;
+}
+
+.spectrogram-hover-vertical {
+    width: 2px;
+}
+
+.spectrogram-hover-horizontal {
+    height: 2px;
+}
+
+.spectrogram-hover-tooltip {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    z-index: 40;
+
+    padding: 8px 10px;
+
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+
+    font-size: 13px;
+    line-height: 1.5;
+
+    border-radius: 4px;
+
+    pointer-events: none;
+
+    white-space: nowrap;
+
+    display: none;
+}
