@@ -211,7 +211,7 @@ export function createAudiogram(){
             }
     
             return xPosition(0);
-        }
+        
     
         regions.forEach(region => {
     
