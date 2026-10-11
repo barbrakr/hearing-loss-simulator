@@ -175,6 +175,21 @@ export function createAudiogram(){
 
             function xForFrequency(freq) {
 
+            function xForFrequency(freq) {
+                const minFreq = frequencies[0];
+                const maxFreq = frequencies[frequencies.length - 1];
+            
+                return margin +
+                    (
+                        Math.log(freq) - Math.log(minFreq)
+                    ) /
+                    (
+                        Math.log(maxFreq) - Math.log(minFreq)
+                    ) *
+                    (width - margin * 2);
+            }
+
+                
             const index =
                 frequencies.findIndex(f => f === freq);
     
@@ -191,8 +206,8 @@ export function createAudiogram(){
                         (freq - frequencies[i]) /
                         (frequencies[i + 1] - frequencies[i]);
     
-                    return xPosition(i) +
-                        t * (xPosition(i + 1) - xPosition(i));
+                    return xForFrequency(frequencies[i]) +
+                        t * (xForFrequency(frequencies[i+1]) - xForFrequency(frequencies[i]));
                 }
             }
     
