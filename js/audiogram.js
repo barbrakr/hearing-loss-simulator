@@ -120,6 +120,59 @@ export function createAudiogram(){
     }
 
 
+    function drawSpeechBanana() {
+        
+            ctx.save();
+        
+            // Typische Sprachbereiche, ungefähr in dB HL.
+            // x: Frequenz in Hz, y: Pegel in dB HL.
+            const regions = [
+                {
+                    name: "Vowels",
+                    color: "#b0b0b0",
+                    points: [
+                        [250, 35],
+                        [250, 10],
+                        [500, 10],
+                        [1000, 15],
+                        [1000, 35],
+                        [500, 45]
+                    ]
+                },
+                {
+                    name: "Sonorants",
+                    color: "#d0d0d0",
+                    points: [
+                        [250, 35],
+                        [500, 25],
+                        [1000, 20],
+                        [2000, 25],
+                        [2000, 45],
+                        [1000, 50],
+                        [500, 45]
+                    ]
+                },
+                {
+                    name: "Consonants",
+                    color: "#e5e5e5",
+                    points: [
+                        [500, 40],
+                        [1000, 25],
+                        [2000, 15],
+                        [4000, 10],
+                        [8000, 15],
+                        [8000, 55],
+                        [4000, 45],
+                        [2000, 50],
+                        [1000, 50]
+                    ]
+                }
+            ];
+        
+            // Frequenz logarithmisch auf die x-Achse abbilden.
+            // Die vorhandene Achse verteilt Frequenzen gleichmäßig
+            // nach Listenindex; deshalb interpolieren wir passend dazu.
+
 
     function draw(){
 
@@ -460,58 +513,7 @@ export function createAudiogram(){
         else
             rightLoss[dragging.index]=db;
 
-        function drawSpeechBanana() {
         
-            ctx.save();
-        
-            // Typische Sprachbereiche, ungefähr in dB HL.
-            // x: Frequenz in Hz, y: Pegel in dB HL.
-            const regions = [
-                {
-                    name: "Vowels",
-                    color: "#b0b0b0",
-                    points: [
-                        [250, 35],
-                        [250, 10],
-                        [500, 10],
-                        [1000, 15],
-                        [1000, 35],
-                        [500, 45]
-                    ]
-                },
-                {
-                    name: "Sonorants",
-                    color: "#d0d0d0",
-                    points: [
-                        [250, 35],
-                        [500, 25],
-                        [1000, 20],
-                        [2000, 25],
-                        [2000, 45],
-                        [1000, 50],
-                        [500, 45]
-                    ]
-                },
-                {
-                    name: "Consonants",
-                    color: "#e5e5e5",
-                    points: [
-                        [500, 40],
-                        [1000, 25],
-                        [2000, 15],
-                        [4000, 10],
-                        [8000, 15],
-                        [8000, 55],
-                        [4000, 45],
-                        [2000, 50],
-                        [1000, 50]
-                    ]
-                }
-            ];
-        
-            // Frequenz logarithmisch auf die x-Achse abbilden.
-            // Die vorhandene Achse verteilt Frequenzen gleichmäßig
-            // nach Listenindex; deshalb interpolieren wir passend dazu.
 
             
     function xForFrequency(freq) {
