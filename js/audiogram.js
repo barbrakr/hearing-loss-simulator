@@ -173,7 +173,7 @@ export function createAudiogram(){
             // Die vorhandene Achse verteilt Frequenzen gleichmäßig
             // nach Listenindex; deshalb interpolieren wir passend dazu.
 
-
+            function xForFrequency(freq) {           
             function xForFrequency(freq) {
                 const minFreq = frequencies[0];
                 const maxFreq = frequencies[frequencies.length - 1];
@@ -211,7 +211,7 @@ export function createAudiogram(){
             }
     
             return xPosition(0);
-        
+    }
     
         regions.forEach(region => {
     
