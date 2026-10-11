@@ -173,7 +173,6 @@ export function createAudiogram(){
             // Die vorhandene Achse verteilt Frequenzen gleichmäßig
             // nach Listenindex; deshalb interpolieren wir passend dazu.
 
-            function xForFrequency(freq) {
 
             function xForFrequency(freq) {
                 const minFreq = frequencies[0];
@@ -308,14 +307,6 @@ export function createAudiogram(){
         
         // Speech Banana — hinter den Kurven
         drawSpeechBanana();
-        
-        // labels
-        ctx.fillStyle = "black";
-        ctx.font = "12px Arial";
-        
-        // ... deine vorhandenen Achsenbeschriftungen ...
-        
-        // Deine vorhandene Legende und Kurven bleiben erhalten.
 
         
         // labels
