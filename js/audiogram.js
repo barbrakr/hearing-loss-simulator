@@ -173,6 +173,85 @@ export function createAudiogram(){
             // Die vorhandene Achse verteilt Frequenzen gleichmäßig
             // nach Listenindex; deshalb interpolieren wir passend dazu.
 
+            function xForFrequency(freq) {
+
+            const index =
+                frequencies.findIndex(f => f === freq);
+    
+            if(index !== -1)
+                return xPosition(index);
+    
+            for(let i = 0; i < frequencies.length - 1; i++) {
+    
+                if(
+                    freq > frequencies[i] &&
+                    freq < frequencies[i + 1]
+                ) {
+                    const t =
+                        (freq - frequencies[i]) /
+                        (frequencies[i + 1] - frequencies[i]);
+    
+                    return xPosition(i) +
+                        t * (xPosition(i + 1) - xPosition(i));
+                }
+            }
+    
+            return xPosition(0);
+        }
+    
+        regions.forEach(region => {
+    
+            ctx.beginPath();
+    
+            region.points.forEach((point, i) => {
+    
+                const x = xForFrequency(point[0]);
+                const y = yPosition(point[1]);
+    
+                if(i === 0)
+                    ctx.moveTo(x, y);
+                else
+                    ctx.lineTo(x, y);
+            });
+    
+            ctx.closePath();
+    
+            ctx.fillStyle = region.color;
+            ctx.globalAlpha = 0.65;
+            ctx.fill();
+    
+            ctx.globalAlpha = 1;
+            ctx.strokeStyle = "#888";
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        });
+    
+        // Labels
+        ctx.fillStyle = "#333";
+        ctx.font = "11px Arial";
+        ctx.textAlign = "center";
+    
+        ctx.fillText(
+            "Vowels",
+            xForFrequency(350),
+            yPosition(27)
+        );
+    
+        ctx.fillText(
+            "Sonorants",
+            xForFrequency(900),
+            yPosition(42)
+        );
+    
+        ctx.fillText(
+            "Consonants",
+            xForFrequency(3500),
+            yPosition(35)
+        );
+    
+        ctx.restore();
+    }
+
 
     function draw(){
 
@@ -210,19 +289,6 @@ export function createAudiogram(){
 
             ctx.stroke();
 
-        }
-
-        // grid
-        ctx.strokeStyle = "#ccc";
-        
-        for(let db = 0; db <= 120; db += 20) {
-        
-            const y = yPosition(db);
-        
-            ctx.beginPath();
-            ctx.moveTo(margin, y);
-            ctx.lineTo(width - margin, y);
-            ctx.stroke();
         }
         
         // Speech Banana — hinter den Kurven
@@ -516,85 +582,7 @@ export function createAudiogram(){
         
 
             
-    function xForFrequency(freq) {
 
-        const index =
-            frequencies.findIndex(f => f === freq);
-
-        if(index !== -1)
-            return xPosition(index);
-
-        for(let i = 0; i < frequencies.length - 1; i++) {
-
-            if(
-                freq > frequencies[i] &&
-                freq < frequencies[i + 1]
-            ) {
-                const t =
-                    (Math.log(freq) - Math.log(frequencies[i])) /
-                    (Math.log(frequencies[i + 1]) -
-                     Math.log(frequencies[i]));
-
-                return xPosition(i) +
-                    t * (xPosition(i + 1) - xPosition(i));
-            }
-        }
-
-        return xPosition(0);
-    }
-
-    regions.forEach(region => {
-
-        ctx.beginPath();
-
-        region.points.forEach((point, i) => {
-
-            const x = xForFrequency(point[0]);
-            const y = yPosition(point[1]);
-
-            if(i === 0)
-                ctx.moveTo(x, y);
-            else
-                ctx.lineTo(x, y);
-        });
-
-        ctx.closePath();
-
-        ctx.fillStyle = region.color;
-        ctx.globalAlpha = 0.65;
-        ctx.fill();
-
-        ctx.globalAlpha = 1;
-        ctx.strokeStyle = "#888";
-        ctx.lineWidth = 1;
-        ctx.stroke();
-    });
-
-    // Labels
-    ctx.fillStyle = "#333";
-    ctx.font = "11px Arial";
-    ctx.textAlign = "center";
-
-    ctx.fillText(
-        "Vowels",
-        xForFrequency(350),
-        yPosition(27)
-    );
-
-    ctx.fillText(
-        "Sonorants",
-        xForFrequency(900),
-        yPosition(42)
-    );
-
-    ctx.fillText(
-        "Consonants",
-        xForFrequency(3500),
-        yPosition(35)
-    );
-
-    ctx.restore();
-}
 
         draw();
 
