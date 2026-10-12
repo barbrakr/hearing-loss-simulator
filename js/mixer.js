@@ -1,6 +1,7 @@
 export function mixBuffers(
     main,
     noise,
+    foreground,
     noiseLevel = 0.2
 ){
 
@@ -39,6 +40,9 @@ export function mixBuffers(
         const noiseData =
             noise.getChannelData(ch);
 
+        const foregroundData =
+            foreground.getChannelData(ch);
+
 
 
         for(
@@ -51,6 +55,9 @@ export function mixBuffers(
                 source[i]
                 +
                 noiseData[i]
+                *
+                noiseLevel
+                + foregroundData[i]
                 *
                 noiseLevel;
 
