@@ -130,7 +130,7 @@ noiseButton.onclick = async () =>{
         null,
         0.15,
         0
-    );
+        );
 
         
         engine.buffer = workingBuffer;
