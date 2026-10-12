@@ -3,8 +3,8 @@ export function mixBuffers(
     main,
     noise,
     foreground,
-    noiseLevel = 0.2,
-    foregroundLevel = 0.15
+    noiseLevel,
+    foregroundLevel
 ) {
     const length = main.length;
 
