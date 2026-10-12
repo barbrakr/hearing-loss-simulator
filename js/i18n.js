@@ -89,7 +89,7 @@ const translations = {
         difference: "Unterschied",
         audio: "Audioquelle",
         sample: "Eingebautes Beispiel",
-        sample1: "Junge (Englisch),
+        sample1: "Junge (Englisch)",
         audiogram: "Interaktives Audiogramm",
         spectrograms: "Spektrogramme",
         play: "Abspielen",
