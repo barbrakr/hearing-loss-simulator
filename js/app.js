@@ -168,22 +168,26 @@ const foregroundButton =
     );
 
 
+
 foregroundButton.onclick = async () => {
     if (!originalBuffer) {
-        status.innerHTML = "Load audio first.";
+        status.textContent = "Load audio first.";
         return;
     }
 
     try {
-        const type =
-            document.getElementById("foregroundSelect").value;
+        const type = document.getElementById(
+            "foregroundSelect"
+        ).value;
 
-        foregroundBuffer = await createForegroundBuffer(
+        const newForeground = await createForegroundBuffer(
             engine.context,
             type,
             originalBuffer.duration,
             originalBuffer.sampleRate
         );
+
+        foregroundBuffer = newForeground;
 
         workingBuffer = mixBuffers(
             originalBuffer,
@@ -201,10 +205,11 @@ foregroundButton.onclick = async () => {
             "CURRENT"
         );
 
-        status.innerHTML = "Foreground added";
+        status.textContent = "Foreground added";
+        console.log("Foreground buffer:", foregroundBuffer);
     } catch (error) {
-        console.error(error);
-        status.innerHTML = "Mixing error: " + error.message;
+        console.error("Foreground mixing failed:", error);
+        status.textContent = `Foreground error: ${error.message}`;
     }
 };
 
