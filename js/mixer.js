@@ -9,7 +9,7 @@ export function mixBuffers(
         foreground,
         foregroundType: foreground?.constructor?.name,
         background,
-        backgroundType: background?.constructor?.name
+        backgroundType: noise?.constructor?.name
     });
     
     const length =
