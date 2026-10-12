@@ -57,7 +57,8 @@ export function mixBuffers(
                 noiseData[i]
                 *
                 noiseLevel
-                + foregroundData[i]
+                + 
+                foregroundData[i]
                 *
                 noiseLevel;
 
