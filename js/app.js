@@ -82,15 +82,15 @@ languageSelect.addEventListener(
 const engine =
     new AudioEngine();
 
-let originalBuffer = null;   // clean audio
-let workingBuffer = null;    // clean + optional noise
-let processedBuffer = null;  // hearing-loss result
+let originalBuffer = null;
+let workingBuffer = null;
+let processedBuffer = null;
+
+let noiseBuffers = [];
+let foregroundBuffer = null;
 
 let originalCanvas = null;
 let lossCanvas = null;
-
-let noiseBuffer = null;
-let foregroundBuffer = null;
 
 function rebuildMix() {
     if (!originalBuffer) return;
@@ -118,25 +118,48 @@ const noiseButton =
     );
 
 
+
 noiseButton.onclick = async () => {
     if (!originalBuffer) {
         status.innerHTML = "Load audio first.";
         return;
     }
 
-    const type =
-        document.getElementById("noiseSelect").value;
+    try {
+        const type = document.getElementById("noiseSelect").value;
 
-    noiseBuffer = await createNoiseBuffer(
-        engine.context,
-        type,
-        originalBuffer.duration,
-        originalBuffer.sampleRate
-    );
+        const noise = await createNoiseBuffer(
+            engine.context,
+            type,
+            originalBuffer.duration,
+            originalBuffer.sampleRate
+        );
 
-    rebuildMix();
+        // ADD the new sound; don't replace previous sounds.
+        noiseBuffers.push(noise);
 
-    status.innerHTML = "Background noise added";
+        workingBuffer = mixBuffers(
+            originalBuffer,
+            noiseBuffers,
+            foregroundBuffer,
+            0.2,
+            0.2
+        );
+
+        engine.buffer = workingBuffer;
+
+        drawSpectrogram(
+            workingBuffer,
+            originalCanvas,
+            "CURRENT"
+        );
+
+        status.innerHTML =
+            `Background added (${noiseBuffers.length} layers)`;
+    } catch (error) {
+        console.error(error);
+        status.innerHTML = "Mixing error: " + error.message;
+    }
 };
 
 const foregroundButton =
@@ -144,25 +167,45 @@ const foregroundButton =
         "foregroundButton"
     );
 
+
 foregroundButton.onclick = async () => {
     if (!originalBuffer) {
         status.innerHTML = "Load audio first.";
         return;
     }
 
-    const type =
-        document.getElementById("foregroundSelect").value;
+    try {
+        const type =
+            document.getElementById("foregroundSelect").value;
 
-    foregroundBuffer = await createForegroundBuffer(
-        engine.context,
-        type,
-        originalBuffer.duration,
-        originalBuffer.sampleRate
-    );
+        foregroundBuffer = await createForegroundBuffer(
+            engine.context,
+            type,
+            originalBuffer.duration,
+            originalBuffer.sampleRate
+        );
 
-    rebuildMix();
+        workingBuffer = mixBuffers(
+            originalBuffer,
+            noiseBuffers,
+            foregroundBuffer,
+            0.2,
+            0.2
+        );
 
-    status.innerHTML = "Foreground added";
+        engine.buffer = workingBuffer;
+
+        drawSpectrogram(
+            workingBuffer,
+            originalCanvas,
+            "CURRENT"
+        );
+
+        status.innerHTML = "Foreground added";
+    } catch (error) {
+        console.error(error);
+        status.innerHTML = "Mixing error: " + error.message;
+    }
 };
 
 window.addEventListener(
@@ -425,6 +468,8 @@ loadButton.onclick = async () => {
         originalBuffer = loadedBuffer;
         workingBuffer = loadedBuffer;
         processedBuffer = null;
+        noiseBuffers = [];
+        foregroundBuffer = null;
         engine.buffer = workingBuffer;
 
 
