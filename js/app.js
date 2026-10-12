@@ -124,13 +124,14 @@ noiseButton.onclick = async () =>{
     console.log(noise);
     console.log(noise instanceof AudioBuffer);
 
-         workingBuffer = mixBuffers(
-            originalBuffer,
-            noise,
-            foreground,
-            0.2,  // Hintergrundgeräusch
-            0.2  // Tinnitus
-        );
+        workingBuffer = mixBuffers(
+        originalBuffer,
+        noise,
+        null,
+        0.15,
+        0
+    );
+
         
         engine.buffer = workingBuffer;
 
