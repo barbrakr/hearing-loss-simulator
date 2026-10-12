@@ -128,6 +128,7 @@ noiseButton.onclick = async () =>{
             mixBuffers(
                 workingBuffer,
                 noise,
+                foreground,
                 0.15
             );
         
