@@ -8,7 +8,7 @@ export function mixBuffers(
     console.log("mixBuffers arguments:", {
         foreground,
         foregroundType: foreground?.constructor?.name,
-        background,
+        noise,
         backgroundType: noise?.constructor?.name
     });
     
