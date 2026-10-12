@@ -38,18 +38,24 @@ export function mixBuffers(
         for (let i = 0; i < length; i++) {
             let sample = source[i];
 
-            for (const layer of noiseLayers) {
-                if (i < layer.data.length) {
-                    sample += layer.data[i] * noiseLevel;
-                }
+        for (const noiseBuffer of noises) {
+            const channel = Math.min(
+                ch,
+                noiseBuffer.numberOfChannels - 1
+            );
+        
+            const data = noiseBuffer.getChannelData(channel);
+        
+            if (i < data.length) {
+                sample += data[i] * noiseLevel;
             }
-
-            if (foregroundData && i < foregroundData.length) {
-                sample += foregroundData[i] * foregroundLevel;
-            }
-
-            out[i] = Math.max(-1, Math.min(1, sample));
         }
+
+if (foregroundData && i < foregroundData.length) {
+    sample += foregroundData[i] * foregroundLevel;
+}
+
+out[i] = Math.max(-1, Math.min(1, sample));
     }
 
     return result;
