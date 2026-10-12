@@ -3,6 +3,10 @@ import {
 } from "./noise.js";
 
 import {
+    createForgegroundBuffer
+} from "./foreground.js";
+
+import {
     mixBuffers
 } from "./mixer.js";
 
