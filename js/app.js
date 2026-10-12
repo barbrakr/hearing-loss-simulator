@@ -88,6 +88,7 @@ let processedBuffer = null;
 
 let noiseBuffers = [];
 let foregroundBuffer = null;
+let tinnitusBuffer = null;
 
 let originalCanvas = null;
 let lossCanvas = null;
@@ -188,7 +189,14 @@ foregroundButton.onclick = async () => {
         );
 
         foregroundBuffer = newForeground;
-
+        
+        // Keep ringing separate so hearing-loss processing
+        // won't affect it.
+        if (foreground === "Tinnitus (ringing)") {
+            tinnitusBuffer = newForeground;
+            foregroundBuffer = null;
+        }
+        
         workingBuffer = mixBuffers(
             originalBuffer,
             noiseBuffers,
@@ -196,8 +204,9 @@ foregroundButton.onclick = async () => {
             0.2,
             0.2
         );
-
+        
         engine.buffer = workingBuffer;
+
 
         drawSpectrogram(
             workingBuffer,
@@ -475,6 +484,7 @@ loadButton.onclick = async () => {
         processedBuffer = null;
         noiseBuffers = [];
         foregroundBuffer = null;
+        
         engine.buffer = workingBuffer;
 
 
@@ -547,6 +557,18 @@ processButton.onclick = async ()=>{
                 workingBuffer,
                 engine.context
             );
+
+        // Add ringing tinnitus after hearing-loss processing
+        if (tinnitusBuffer) {
+            processedBuffer = mixBuffers(
+                processedBuffer,
+                [],
+                tinnitusBuffer,
+                0,
+                0.2
+            );
+        }
+
 
 
         const original =
