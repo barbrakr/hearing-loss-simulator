@@ -1,10 +1,9 @@
-
 export function mixBuffers(
     main,
     noise,
     foreground,
-    noiseLevel,
-    foregroundLevel
+    noiseLevel = 0,
+    foregroundLevel = 0
 ) {
     const length = main.length;
 
@@ -14,7 +13,7 @@ export function mixBuffers(
         sampleRate: main.sampleRate
     });
 
-    // Backwards-compatible: accept one noise buffer or many.
+    // Accept either one noise buffer or an array of buffers.
     const noises = noise
         ? (Array.isArray(noise) ? noise : [noise])
         : [];
@@ -38,24 +37,21 @@ export function mixBuffers(
         for (let i = 0; i < length; i++) {
             let sample = source[i];
 
-        for (const noiseBuffer of noises) {
-            const channel = Math.min(
-                ch,
-                noiseBuffer.numberOfChannels - 1
-            );
-        
-            const data = noiseBuffer.getChannelData(channel);
-        
-            if (i < data.length) {
-                sample += data[i] * noiseLevel;
+            // Mix all selected background noise layers.
+            for (const layer of noiseLayers) {
+                if (i < layer.data.length) {
+                    sample += layer.data[i] * noiseLevel;
+                }
             }
+
+            // Mix optional foreground / tinnitus.
+            if (foregroundData && i < foregroundData.length) {
+                sample += foregroundData[i] * foregroundLevel;
+            }
+
+            // Keep samples within the valid audio range.
+            out[i] = Math.max(-1, Math.min(1, sample));
         }
-
-if (foregroundData && i < foregroundData.length) {
-    sample += foregroundData[i] * foregroundLevel;
-}
-
-out[i] = Math.max(-1, Math.min(1, sample));
     }
 
     return result;
