@@ -30,8 +30,10 @@ const translations = {
             one from the drop-down). 
         `,
 
-        about_text3: "None of the data is saved, so if you would like to keep a copy for future reference, please screenshot the data and save it locally. Happy exploring!",
+        about_text3: "None of the data is saved, so if you would like to keep a copy for future reference, please screenshot the data and save it locally.",
 
+        about_text4: "Happy exploring!",
+            
         original: "Original",
         hearingLoss: "Hearing Loss",
         difference: "Difference",
@@ -87,7 +89,9 @@ const translations = {
             hochladen oder ein bereits aufgenommenes Beispiel aus dem Drop-down-Menü auswählen.
         `,
 
-        about_text3: "Es werden keine Daten gespeichert. Wenn Sie eine Kopie für eine spätere Verwendung aufbewahren möchten, erstellen Sie bitte einen Screenshot der Daten und speichern Sie ihn lokal.Viel Spaß beim Erkunden!",
+        about_text3: "Es werden keine Daten gespeichert. Wenn Sie eine Kopie für eine spätere Verwendung aufbewahren möchten, erstellen Sie bitte einen Screenshot der Daten und speichern Sie ihn lokal.",
+        
+        about_text4: "Viel Spaß beim Erkunden!",
 
         original: "Original",
         hearingLoss: "Hörverlust",
