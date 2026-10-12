@@ -1,87 +1,44 @@
+
 export function mixBuffers(
     main,
     noise,
     foreground,
-    noiseLevel = 0.2
-){
+    noiseLevel = 0.2,
+    foregroundLevel = 0.15
+) {
+    const length = main.length;
 
-    console.log("mixBuffers arguments:", {
-        foreground,
-        foregroundType: foreground?.constructor?.name,
-        noise,
-        backgroundType: noise?.constructor?.name
+    const result = new AudioBuffer({
+        length,
+        numberOfChannels: main.numberOfChannels,
+        sampleRate: main.sampleRate
     });
-    
-    const length =
-        main.length;
 
+    for (let ch = 0; ch < result.numberOfChannels; ch++) {
+        const out = result.getChannelData(ch);
+        const source = main.getChannelData(ch);
 
-    const result =
-        new AudioBuffer({
-            length: length,
-            numberOfChannels: 2,
-            sampleRate: main.sampleRate
-        });
+        const noiseData = noise
+            ? noise.getChannelData(
+                Math.min(ch, noise.numberOfChannels - 1)
+            )
+            : null;
 
+        const foregroundData = foreground
+            ? foreground.getChannelData(
+                Math.min(ch, foreground.numberOfChannels - 1)
+            )
+            : null;
 
-
-    for(
-        let ch = 0;
-        ch < 2;
-        ch++
-    ){
-
-        const out =
-            result.getChannelData(ch);
-
-
-        const source =
-            main.getChannelData(
-                Math.min(
-                    ch,
-                    main.numberOfChannels - 1
-                )
-            );
-
-
-        const noiseData =
-            noise.getChannelData(ch);
-
-        const foregroundData =
-            foreground.getChannelData(ch);
-
-
-
-        for(
-            let i = 0;
-            i < length;
-            i++
-        ){
-
+        for (let i = 0; i < length; i++) {
             out[i] =
                 source[i]
-                +
-                noiseData[i]
-                *
-                noiseLevel
-                + 
-                foregroundData[i]
-                *
-                noiseLevel;
+                + (noiseData ? noiseData[i] * noiseLevel : 0)
+                + (foregroundData ? foregroundData[i] * foregroundLevel : 0);
 
-
-            if(out[i] > 1)
-                out[i] = 1;
-
-
-            if(out[i] < -1)
-                out[i] = -1;
-
+            out[i] = Math.max(-1, Math.min(1, out[i]));
         }
-
     }
 
-
     return result;
-
 }
