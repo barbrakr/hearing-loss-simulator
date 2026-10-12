@@ -89,119 +89,80 @@ let processedBuffer = null;  // hearing-loss result
 let originalCanvas = null;
 let lossCanvas = null;
 
+let noiseBuffer = null;
+let foregroundBuffer = null;
+
+function rebuildMix() {
+    if (!originalBuffer) return;
+
+    workingBuffer = mixBuffers(
+        originalBuffer,
+        noiseBuffer,
+        foregroundBuffer,
+        0.2, // Background level
+        0.2  // Foreground / tinnitus level
+    );
+
+    engine.buffer = workingBuffer;
+
+    drawSpectrogram(
+        workingBuffer,
+        originalCanvas,
+        "CURRENT"
+    );
+}
+
 const noiseButton =
     document.getElementById(
         "noiseButton"
     );
 
 
-noiseButton.onclick = async () =>{
-    if(!engine.buffer){
-    
-        status.innerHTML =
-            "Load audio first.";
-    
+noiseButton.onclick = async () => {
+    if (!originalBuffer) {
+        status.innerHTML = "Load audio first.";
         return;
-    
     }
 
     const type =
-        document.getElementById(
-            "noiseSelect"
-        ).value;
+        document.getElementById("noiseSelect").value;
 
+    noiseBuffer = await createNoiseBuffer(
+        engine.context,
+        type,
+        originalBuffer.duration,
+        originalBuffer.sampleRate
+    );
 
+    rebuildMix();
 
-    
-    const noise =
-        await createNoiseBuffer(
-            engine.context,
-            type,
-            engine.buffer.duration,
-            engine.buffer.sampleRate
-        );
-    
-    console.log(noise);
-    console.log(noise instanceof AudioBuffer);
-
-        workingBuffer = mixBuffers(
-        originalBuffer,
-        noise,
-        null,
-        0.15,
-        0
-        );
-
-        
-        engine.buffer = workingBuffer;
-
-        drawSpectrogram(
-            workingBuffer,
-            originalCanvas,
-            "CURRENT"
-        );
-
-
-    status.innerHTML =
-        "Background noise added";
-
+    status.innerHTML = "Background noise added";
 };
-
 
 const foregroundButton =
     document.getElementById(
         "foregroundButton"
     );
 
-
-foregroundButton.onclick = async () =>{
-    if(!engine.buffer){
-    
-        status.innerHTML =
-            "Load audio first.";
-    
+foregroundButton.onclick = async () => {
+    if (!originalBuffer) {
+        status.innerHTML = "Load audio first.";
         return;
-    
     }
 
     const type =
-        document.getElementById(
-            "foregroundSelect"
-        ).value;
+        document.getElementById("foregroundSelect").value;
 
+    foregroundBuffer = await createForegroundBuffer(
+        engine.context,
+        type,
+        originalBuffer.duration,
+        originalBuffer.sampleRate
+    );
 
+    rebuildMix();
 
-    
-    const foreground =
-        await createForegroundBuffer(
-            engine.context,
-            type,
-            engine.buffer.duration,
-            engine.buffer.sampleRate
-        );
-    
-    console.log(foreground);
-    console.log(foreground instanceof AudioBuffer);
-
-        workingBuffer =
-            mixBuffers(
-                workingBuffer,
-                foreground,
-                0.15
-            );
-        
-        engine.buffer = workingBuffer;
-
-        drawSpectrogram(
-            workingBuffer,
-            originalCanvas,
-            "CURRENT"
-        );
-
-
-    status.innerHTML =
-        "Foreground noise added";
-
+    status.innerHTML = "Foreground added";
 };
 
 window.addEventListener(
