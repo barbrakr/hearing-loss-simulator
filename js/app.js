@@ -141,6 +141,63 @@ noiseButton.onclick = async () =>{
 
 };
 
+
+const foregroundButton =
+    document.getElementById(
+        "foregroundButton"
+    );
+
+
+foregroundButton.onclick = async () =>{
+    if(!engine.buffer){
+    
+        status.innerHTML =
+            "Load audio first.";
+    
+        return;
+    
+    }
+
+    const type =
+        document.getElementById(
+            "foregroundSelect"
+        ).value;
+
+
+
+    
+    const foreground =
+        await createForegroundBuffer(
+            engine.context,
+            type,
+            engine.buffer.duration,
+            engine.buffer.sampleRate
+        );
+    
+    console.log(foreground);
+    console.log(foreground instanceof AudioBuffer);
+
+        workingBuffer =
+            mixBuffers(
+                workingBuffer,
+                foreground,
+                0.15
+            );
+        
+        engine.buffer = workingBuffer;
+
+        drawSpectrogram(
+            workingBuffer,
+            originalCanvas,
+            "CURRENT"
+        );
+
+
+    status.innerHTML =
+        "Foreground noise added";
+
+};
+
 window.addEventListener(
     "DOMContentLoaded",
     () => {
@@ -179,6 +236,9 @@ window.addEventListener(
 
     }
 );
+
+
+
 
 
 const loadButton =
