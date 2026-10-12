@@ -169,7 +169,6 @@ const foregroundButton =
     );
 
 
-
 foregroundButton.onclick = async () => {
     if (!originalBuffer) {
         status.textContent = "Load audio first.";
@@ -188,15 +187,17 @@ foregroundButton.onclick = async () => {
             originalBuffer.sampleRate
         );
 
+        // Clear any previously loaded ringing sound
+        tinnitusBuffer = null;
+
         foregroundBuffer = newForeground;
-        
-        // Keep ringing separate so hearing-loss processing
-        // won't affect it.
-        if (foreground === "Tinnitus (ringing)") {
+
+        // Keep ringing separate from hearing-loss processing
+        if (type.toLowerCase() === "tTinnitus (ringing)") {
             tinnitusBuffer = newForeground;
             foregroundBuffer = null;
         }
-        
+
         workingBuffer = mixBuffers(
             originalBuffer,
             noiseBuffers,
@@ -204,9 +205,8 @@ foregroundButton.onclick = async () => {
             0.2,
             0.2
         );
-        
-        engine.buffer = workingBuffer;
 
+        engine.buffer = workingBuffer;
 
         drawSpectrogram(
             workingBuffer,
@@ -216,11 +216,14 @@ foregroundButton.onclick = async () => {
 
         status.textContent = "Foreground added";
         console.log("Foreground buffer:", foregroundBuffer);
+        console.log("Tinnitus buffer:", tinnitusBuffer);
+
     } catch (error) {
         console.error("Foreground mixing failed:", error);
         status.textContent = `Foreground error: ${error.message}`;
     }
 };
+
 
 window.addEventListener(
     "DOMContentLoaded",
