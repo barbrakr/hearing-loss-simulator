@@ -5,6 +5,13 @@ export function mixBuffers(
     noiseLevel = 0.2
 ){
 
+    console.log("mixBuffers arguments:", {
+        foreground,
+        foregroundType: foreground?.constructor?.name,
+        background,
+        backgroundType: background?.constructor?.name
+    });
+    
     const length =
         main.length;
 
