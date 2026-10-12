@@ -3,7 +3,7 @@ import {
 } from "./noise.js";
 
 import {
-    createForgroundBuffer
+    createForegroundBuffer
 } from "./foreground.js";
 
 import {
