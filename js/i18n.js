@@ -6,10 +6,10 @@ const translations = {
         about: "Introduction",
 
         about_text1: `
-            This is an educational tool for individuals with normal hearing
+            This is an educational tool for individuals with normal or corrected-to-normal hearing
             on specific hearing loss outcomes using concrete audio, spectrogram
             and speech perception measures. In order to use this tool effectively,
-            please first make sure that your own hearing is within a normal
+            please first make sure that your own hearing is within a normal or corrected-to-normal
             -5 to 19 decibel hearing level range, i.e. by using the tool provided
             by Stéphane Pigeon available
             <a href="https://hearingtest.online" target="_blank" rel="noopener noreferrer">
@@ -19,11 +19,11 @@ const translations = {
             <a href="https://mimi.io/products/mimi-hearing-test-app" target="_blank" rel="noopener noreferrer">
                 as the Mimi hearing test app
             </a>
-            (both last accessed on October 4th, 2026).
+            (both last accessed on October 4th, 2026 and only available in English).
         `,
 
         about_text2: `
-            After ensuring you have normal hearing yourself, you may use this
+            After ensuring you have normal or corrected-to-normal hearing yourself, you may use this
             website app as an educational tool to understand the hearing loss
             of your loved one through entering the audiogram interactively and
             even uploading your own audio examples (or choose a pre-recorded
@@ -37,6 +37,7 @@ const translations = {
         original: "Original",
         hearingLoss: "Hearing Loss",
         difference: "Difference",
+        audiogram: "Interactive Audiogram",
         spectrograms: "Spectrograms",
         play: "Play",
         stop: "Stop",
@@ -56,11 +57,11 @@ const translations = {
 
         about_text1: `
             Diese Website-App dient als Bildungswerkzeug für Menschen mit
-            normalem Hörvermögen, um die Auswirkungen bestimmter Hörverluste
+            normalem oder technisch korrigiertem Hörvermögen, um die Auswirkungen bestimmter Hörverluste
             anhand konkreter Audio-, Spektrogramm- und Sprachwahrnehmungswerte
             zu verstehen. Um dieses Werkzeug effektiv zu nutzen, stellen Sie
             bitte zunächst sicher, dass Ihr eigenes Hörvermögen innerhalb eines
-            normalen Bereichs von -5 bis 19 Dezibel Hörlevel liegt, beispielsweise
+            normalen oder technisch korrigierten Bereichs von -5 bis 19 Dezibel Hörlevel liegt, beispielsweise
             mithilfe des von Stéphane Pigeon zur Verfügung gestellten
             <a href="https://hearingtest.online" target="_blank" rel="noopener noreferrer">
                 webbasierten Hörtests
@@ -69,11 +70,11 @@ const translations = {
             <a href="https://mimi.io/products/mimi-hearing-test-app" target="_blank" rel="noopener noreferrer">
                 Mimi Hörtest App
             </a>
-            (beide zuletzt am 4. Oktober 2026 aufgerufen).
+            (beide zuletzt am 4. Oktober 2026 aufgerufen und nur auf Englisch verfügbar).
         `,
 
         about_text2: `
-            Sobald Sie sichergestellt haben, dass Sie selbst normalhörend sind,
+            Sobald Sie sichergestellt haben, dass Sie selbst normalhörend sind oder Ihr Hörvermögen technisch auf ein normales Level korrigiert wurde,
             können Sie diese Website-App als Bildungswerkzeug verwenden, um den
             Hörverlust Ihres Angehörigen besser nachzuvollziehen. Dazu können
             Sie das Audiogramm interaktiv eingeben und eigene Audiobeispiele
@@ -88,6 +89,7 @@ const translations = {
         original: "Original",
         hearingLoss: "Hörverlust",
         difference: "Unterschied",
+        audiogram: "Interaktives Audiogramm",
         spectrograms: "Spektrogramme",
         play: "Abspielen",
         stop: "Stopp",
