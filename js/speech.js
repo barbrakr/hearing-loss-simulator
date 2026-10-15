@@ -762,3 +762,12 @@ export function createSpeechUI({
         }
     );
 }
+
+
+const references = document.getElementById("references");
+const speechSection = document.getElementById("speech-perception");
+
+if (references && speechSection) {
+    speechSection.insertAdjacentElement("afterend", references);
+}
+
