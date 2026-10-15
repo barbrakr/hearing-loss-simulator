@@ -210,6 +210,35 @@ background:#eeeeee;
     background: #f0f0f0;
 }
 
+
+#references {
+    margin: 40px auto 20px;
+    padding: 20px;
+    max-width: 900px;
+    border-top: 1px solid #ccc;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+#references h2 {
+    margin-bottom: 12px;
+    font-size: 1.2rem;
+}
+
+#references ul {
+    padding-left: 22px;
+}
+
+#references li {
+    margin-bottom: 8px;
+}
+
+#references a {
+    color: inherit;
+    text-decoration: underline;
+}
+
+
 #language-options.hidden {
     display: none;
 }
