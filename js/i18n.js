@@ -138,4 +138,6 @@ export function setLanguage(language) {
 
             }
         });
+    document.getElementById("language-options").classList.add("hidden");
+    document.getElementById("language-toggle").setAttribute("aria-expanded", "false");
 }
