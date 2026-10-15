@@ -79,6 +79,24 @@ languageSelect.addEventListener(
 );
 
 
+
+const languageToggle = document.getElementById("language-toggle");
+const languageOptions = document.getElementById("language-options");
+
+languageToggle.addEventListener("click", () => {
+    const isOpen = languageOptions.classList.toggle("hidden") === false;
+    languageToggle.setAttribute("aria-expanded", String(isOpen));
+});
+
+document.addEventListener("click", (event) => {
+    if (!document.getElementById("language-select").contains(event.target)) {
+        languageOptions.classList.add("hidden");
+        languageToggle.setAttribute("aria-expanded", "false");
+    }
+});
+
+
+
 const engine =
     new AudioEngine();
 
