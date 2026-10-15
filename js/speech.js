@@ -762,3 +762,6 @@ export function createSpeechUI({
         }
     );
 }
+
+<a href="https://www.flaticon.com/free-icons/flag" title="flag icons">Flag icons created by Magnific - Flaticon</a>
+
