@@ -56,7 +56,7 @@ const translations = {
         speechRecognition: "Speech recognition",
         processing: "Processing...",
         finished: "Finished",
-        reference_title: "References & Credits"
+        references_title: "References & Credits"
     },
 
 
@@ -117,7 +117,7 @@ const translations = {
         speechRecognition: "Spracherkennung",
         processing: "Verarbeitung...",
         finished: "Fertig",
-        reference_title: "Referenzen und Bildnachweise"
+        references_title: "Referenzen und Bildnachweise"
     }
 };
 
