@@ -55,7 +55,8 @@ const translations = {
         selectNoise: "Select background noise",
         speechRecognition: "Speech recognition",
         processing: "Processing...",
-        finished: "Finished"
+        finished: "Finished",
+        reference_title: "References & Credits"
     },
 
 
@@ -115,7 +116,8 @@ const translations = {
         selectNoise: "Hintergrundgeräusch auswählen",
         speechRecognition: "Spracherkennung",
         processing: "Verarbeitung...",
-        finished: "Fertig"
+        finished: "Fertig",
+        reference_title: "Referenzen und Bildnachweise"
     }
 };
 
