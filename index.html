@@ -15,10 +15,23 @@ content="width=device-width, initial-scale=1">
 </script>
 
   
+
 <div id="language-select">
-    <img src="language/us-flag.png" alt="American English" onclick="selectLanguage('en')">
-    <img src="language/german-flag.png" alt="Deutsch" onclick="selectLanguage('de')">
+    <button id="language-toggle" type="button" aria-label="Select language" aria-expanded="false">
+        <img src="language/us-flag.png" alt="English">
+        <span class="language-arrow">▾</span>
+    </button>
+
+    <div id="language-options" class="hidden">
+        <button type="button" onclick="selectLanguage('en')">
+            <img src="language/us-flag.png" alt=""> English
+        </button>
+        <button type="button" onclick="selectLanguage('de')">
+            <img src="language/german-flag.png" alt=""> Deutsch
+        </button>
+    </div>
 </div>
+
 
 /<a href="https://www.flaticon.com/free-icons/germany" title="germany icons">Germany icons created by Magnific - Flaticon</a>
 /<a href="https://www.flaticon.com/free-icons/flag" title="flag icons">Flag icons created by Magnific - Flaticon</a>
