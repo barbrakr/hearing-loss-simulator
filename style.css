@@ -240,8 +240,8 @@ background:#eeeeee;
 
 #speech-perception {
     display: block;
-    white-space: pre-wrap;
     writing-mode: horizontal-tb;
+    white-space: pre-wrap;
 }
 
 #speech-perception .perceived-letter {
