@@ -238,6 +238,16 @@ background:#eeeeee;
     text-decoration: underline;
 }
 
+#speech-perception {
+    display: block;
+    white-space: pre-wrap;
+    writing-mode: horizontal-tb;
+}
+
+#speech-perception .perceived-letter {
+    display: inline;
+}
+
 
 #language-options.hidden {
     display: none;
