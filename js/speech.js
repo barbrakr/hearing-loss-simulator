@@ -510,6 +510,7 @@ function phonemeAudibility(
 ========================================================= */
 
 
+
 function simulateSpeechPerception(text, audiogram) {
     let output = "";
 
@@ -518,36 +519,37 @@ function simulateSpeechPerception(text, audiogram) {
 
         let profile = phonemeProfiles[lower];
 
-        if (lower === "ä") {
-            profile = phonemeProfiles.ae;
-        } else if (lower === "ö") {
-            profile = phonemeProfiles.oe;
-        } else if (lower === "ü") {
-            profile = phonemeProfiles.ue;
-        }
+        if (lower === "ä") profile = phonemeProfiles.ae;
+        else if (lower === "ö") profile = phonemeProfiles.oe;
+        else if (lower === "ü") profile = phonemeProfiles.ue;
 
-        // Preserve spaces, punctuation and unknown characters
+        // Preserve spaces, punctuation and unsupported characters.
         if (!profile) {
-            output += character;
+            output += character
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
             continue;
         }
 
         const audibility = phonemeAudibility(profile, audiogram);
+        const difficulty = Math.max(0, Math.min(1, 1 - audibility));
 
-        // Map audibility to a gentler masking probability
-        const hearingDifficulty = Math.max(
-            0,
-            Math.min(1, 1 - audibility)
-        );
+        // Tune these values to control the visual strength.
+        const opacity = 1 - difficulty * 0.65;
+        const blur = difficulty * 2.5;
 
-        const maskingProbability = Math.pow(
-            hearingDifficulty,
-            2
-        ) * 0.35;
+        const safeCharacter = character
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
 
-        output += Math.random() < maskingProbability
-            ? "·"
-            : character;
+        output += `<span class="perceived-letter"
+            style="opacity:${opacity.toFixed(2)};
+                   filter:blur(${blur.toFixed(2)}px)"
+            title="Estimated audibility: ${(audibility * 100).toFixed(0)}%">
+            ${safeCharacter}
+        </span>`;
     }
 
     return output;
@@ -731,7 +733,7 @@ export function createSpeechUI({
                     result.text
                 ) {
 
-                    perception.textContent =
+                    perception.innerHTML =
                         simulateSpeechPerception(
                             result.text,
                             audiogram
