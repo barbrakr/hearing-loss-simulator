@@ -238,16 +238,28 @@ background:#eeeeee;
     text-decoration: underline;
 }
 
+
+
+.speech-section {
+    width: 100%;
+    box-sizing: border-box;
+}
+
 #speech-perception {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
     display: block;
     writing-mode: horizontal-tb;
     white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    word-break: normal;
 }
 
 #speech-perception .perceived-letter {
     display: inline;
+    writing-mode: horizontal-tb;
 }
-
 
 #language-options.hidden {
     display: none;
