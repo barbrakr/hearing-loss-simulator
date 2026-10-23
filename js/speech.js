@@ -424,54 +424,29 @@ const phonemeProfiles = {
    AUDIBILITY
 ========================================================= */
 
-function bandAudibility(
-    band,
-    audiogram
-) {
+function bandAudibility(band, audiogram) {
+    const center = Math.sqrt(band[0] * band[1]);
 
-    const low =
-        band[0];
+    const leftLoss = interpolateLoss(
+        center,
+        audiogram.frequencies,
+        audiogram.left
+    );
 
-    const high =
-        band[1];
+    const rightLoss = interpolateLoss(
+        center,
+        audiogram.frequencies,
+        audiogram.right
+    );
 
+    const averageLoss = (leftLoss + rightLoss) / 2;
 
-    const center =
-        Math.sqrt(
-            low * high
-        );
+    // Keine simulierte Beeinträchtigung bei 0 dB HL.
+    if (averageLoss <= 0) {
+        return 1;
+    }
 
-
-    const leftLoss =
-        interpolateLoss(
-            center,
-            audiogram.frequencies,
-            audiogram.left
-        );
-
-
-    const rightLoss =
-        interpolateLoss(
-            center,
-            audiogram.frequencies,
-            audiogram.right
-        );
-
-
-    const averageLoss =
-        (
-            leftLoss +
-            rightLoss
-        ) / 2;
-
-
-    return 1 /
-        (
-            1 +
-            Math.exp(
-                (averageLoss - 25) / 10
-            )
-        );
+    return Math.exp(-averageLoss / 40);
 }
 
 
