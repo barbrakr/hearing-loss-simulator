@@ -544,12 +544,7 @@ function simulateSpeechPerception(text, audiogram) {
             .replace(/</g, "&lt;")
             .replace(/>/g, "&gt;");
 
-        output += `<span class="perceived-letter"
-            style="opacity:${opacity.toFixed(2)};
-                   filter:blur(${blur.toFixed(2)}px)"
-            title="Estimated audibility: ${(audibility * 100).toFixed(0)}%">
-            ${safeCharacter}
-        </span>`;
+        output += `<span class="perceived-letter" style="opacity:${opacity.toFixed(2)}; filter:blur(${blur.toFixed(2)}px)" title="Estimated audibility: ${(audibility * 100).toFixed(0)}%">${safeCharacter}</span>`;
     }
 
     return output;
